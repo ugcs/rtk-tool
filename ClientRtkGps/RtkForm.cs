@@ -9,11 +9,13 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Flurl.Util;
 
 namespace ClientRtkGps
 {
@@ -37,16 +39,16 @@ namespace ClientRtkGps
         private static int bps = 0;
         private int bpsusefull = 0;
 
-        private bool rtcm_msg = true;
+        private MavMsgsPackedType rtcm_msg = MavMsgsPackedType.GPS_RTCM_DATA;
+
+        private bool override_id = false;
 
         private MyPointLatLngAlt basepos = MyPointLatLngAlt.Zero;
         private MyPointLatLngAlt MovingBase = MyPointLatLngAlt.Zero;
 
         private string status_line3;
 
-        // TODO: some config for path
-        private string basepostlistfile = //Settings.GetUserDataDirectory() + Path.DirectorySeparatorChar +
-                                          "baseposlist.xml";
+        private string basepostlistfile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ClientRtkGps", "baseposlist.xml");
 
         private RtkTransmitter transmitter;
         private List<NamedPointLatLngAlt> baseposList = new List<NamedPointLatLngAlt>();
@@ -64,7 +66,7 @@ namespace ClientRtkGps
 
             transmitter = new RtkTransmitter();
 
-            injectMsgTypeCheckBox.Checked = rtcm_msg;
+            mavMsgTypeComboBox.SelectedIndex = (int)rtcm_msg;
 
             loadBasePosList();
             loadBasePOS();
@@ -97,7 +99,7 @@ namespace ClientRtkGps
             SetComboStringItem(sourceSelectorComboBox, settings.SourceType);
             SetComboStringItem(sourceBaudRateComboBox, settings.SourceBaudRate.ToString());
             sourceSpecificTextBox.Text = settings.SourceSpecificText;
-            injectMsgTypeCheckBox.Checked = settings.InjectMsgType;
+            mavMsgTypeComboBox.SelectedIndex = settings.InjectMsgType;
 
             SetComboStringItem(sinkSelectorComboBox, settings.SerialSinkName);
             SetComboStringItem(sinkBaudRateComboBox, settings.SinkBaudRate.ToString());
@@ -136,7 +138,7 @@ namespace ClientRtkGps
             int.TryParse(sourceBaudRateComboBox.SelectedItem?.ToString(), out intValue);
             settings.SourceBaudRate = intValue;
             settings.SourceSpecificText = sourceSpecificTextBox.Text;
-            settings.InjectMsgType = injectMsgTypeCheckBox.Checked;
+            settings.InjectMsgType = mavMsgTypeComboBox.SelectedIndex;
 
             settings.SerialSinkName = sinkSelectorComboBox.SelectedItem?.ToString();
             intValue = 0;
@@ -397,11 +399,23 @@ namespace ClientRtkGps
                             System.Threading.Thread.Sleep(10000);
                         }
 
-                        byte[] buffer = new byte[110];
+                        byte[] buffer = new byte[1];
 
-                        // limit to 180 byte packet if using new packet
-                        if (rtcm_msg)
+                        // limit to 180 byte packet if using rtcm_data msg
+                        if (rtcm_msg == MavMsgsPackedType.GPS_RTCM_DATA)
+                        {
                             buffer = new byte[180];
+                        }
+                        // limit to 110 byte packet if using inject_data msg
+                        else if (rtcm_msg == MavMsgsPackedType.GPS_INJECT_DATA)
+                        {
+                            buffer = new byte[110];
+                        }
+                        // limit to 90 byte packet if using inject_data msg
+                        else if (rtcm_msg == MavMsgsPackedType.DATA96)
+                        {
+                            buffer = new byte[90];
+                        }
 
                         while (comPort.BytesToRead > 0)
                         {
@@ -414,8 +428,8 @@ namespace ClientRtkGps
                             bps += read;
 
                             // if this is raw data transport of unknown packet types
-                            if (!(isrtcm || issbp))
-                                sendData(buffer, (byte)read);
+                            //if (!(isrtcm || issbp))
+                            //    sendData(buffer, (byte)read);
 
                             // check for valid rtcm/sbp/ubx packets
                             for (int a = 0; a < read; a++)
@@ -428,6 +442,31 @@ namespace ClientRtkGps
                                     ubx_m8p.resetParser();
                                     nmea.resetParser();
                                     isrtcm = true;
+
+                                    // if change RTK Station ID 
+                                    if (override_id)
+                                    {
+                                        int new_id = 0;
+                                        if (int.TryParse(overrideIDTextBox.Text, out new_id))
+                                        {
+                                            if (new_id >= 0 && new_id < 4096)
+                                            {
+                                                // tmp
+                                                //uint iddd = (uint)(rtcm3.packet[3] << 4) + (uint)(rtcm3.packet[4] >> 4);
+                                                //var crc = rtcm3.crc24.crc24q(rtcm3.packet, (uint)rtcm3.length - 3, 0);
+                                                //var crcpacket = rtcm3.getbitu(rtcm3.packet, (uint)(rtcm3.length - 3) * 8, 24);
+                                                // --tmp
+                                                   
+                                                // set new id                                            
+                                                rtcm3.setbitu(rtcm3.packet, 36, 12, (uint)new_id);
+
+                                                // calculate and update new CRC
+                                                uint crc = rtcm3.crc24.crc24q(rtcm3.packet, (uint)rtcm3.length - 3, 0);
+                                                rtcm3.setbitu(rtcm3.packet, (uint)(rtcm3.length - 3) * 8, 24, crc);
+                                            }
+                                        }
+                                    }
+
                                     sendData(rtcm3.packet, (byte)rtcm3.length);
                                     bpsusefull += rtcm3.length;
                                     string msgname = "Rtcm" + seenmsg;
@@ -437,8 +476,9 @@ namespace ClientRtkGps
 
                                     ExtractBasePos(seenmsg);
 
-                                    seenRTCM(seenmsg);
+                                        seenRTCM(seenmsg);
                                 }
+
                                 // sbp
                                 if ((seenmsg = sbp.read(buffer[a])) > 0)
                                 {
@@ -446,13 +486,14 @@ namespace ClientRtkGps
                                     ubx_m8p.resetParser();
                                     nmea.resetParser();
                                     issbp = true;
-                                    sendData(sbp.packet, (byte)sbp.length);
+                                    //sendData(sbp.packet, (byte)sbp.length);
                                     bpsusefull += sbp.length;
                                     string msgname = "Sbp" + seenmsg.ToString("X4");
                                     if (!msgseen.ContainsKey(msgname))
                                         msgseen[msgname] = 0;
                                     msgseen[msgname] = (int)msgseen[msgname] + 1;
                                 }
+
                                 // ubx
                                 if ((seenmsg = ubx_m8p.Read(buffer[a])) > 0)
                                 {
@@ -465,6 +506,7 @@ namespace ClientRtkGps
                                         msgseen[msgname] = 0;
                                     msgseen[msgname] = (int)msgseen[msgname] + 1;
                                 }
+
                                 // nmea
                                 if ((seenmsg = nmea.Read(buffer[a])) > 0)
                                 {
@@ -478,8 +520,10 @@ namespace ClientRtkGps
                                 }
                             }
                         }
-                        // for some RTK Bases this original Sleep() missed messages 
-                        // System.Threading.Thread.Sleep(10);
+                        // for some RTK Bases (North) this original Sleep() missed messages 
+                        //System.Threading.Thread.Sleep(10);
+
+                        System.Threading.Thread.Sleep(1);
                     }
                     catch (Exception ex)
                     {
@@ -969,28 +1013,32 @@ namespace ClientRtkGps
 
         private void udpClientCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (udpClientCheckBox.Checked)
+            if (udpClientCheckBox.Checked && Int32.TryParse(udpClientPortTextBox.Text, out int port))
             {
-                udpClientTextBox.Enabled = false;
-                udpClientPortTextBox.Enabled = false;
-
-                if (Int32.TryParse(udpClientPortTextBox.Text, out int port))
-                {
+               
                     try
                     {
                         transmitter.SetUdpClientSink(udpClientTextBox.Text, port);
+                        udpClientTextBox.Enabled = false;
+                        udpClientPortTextBox.Enabled = false;
+
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex);
+                        MessageBox.Show("Failed to start UDP sink\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         udpClientCheckBox.Checked = false;
                     }
-                }
             }
             else
             {
                 udpClientTextBox.Enabled = true;
                 udpClientPortTextBox.Enabled = true;
+                if (udpClientCheckBox.Checked)
+                {
+                    MessageBox.Show("Failed to start UDP sink\nPort is invalid" , "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                udpClientCheckBox.Checked = false;
 
                 transmitter.DisableUdpClientSink();
             }
@@ -998,28 +1046,30 @@ namespace ClientRtkGps
 
         private void serialCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (serialCheckBox.Checked)
-            {
-                sinkSelectorComboBox.Enabled = false;
-                sinkBaudRateComboBox.Enabled = false;
-
-                if (Int32.TryParse(sinkBaudRateComboBox.Text, out int baudrate))
-                {
-                    try
+            if (serialCheckBox.Checked && Int32.TryParse(sinkBaudRateComboBox.Text, out int baudrate))
+            {        
+                     try
                     {
                         transmitter.SetSerialSink(sinkSelectorComboBox.Text, baudrate);
+                        sinkSelectorComboBox.Enabled = false;
+                        sinkBaudRateComboBox.Enabled = false;
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex);
+                        MessageBox.Show("Failed to start Serial sink\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         serialCheckBox.Checked = false;
-                    }
-                }
+                    }             
             }
             else
             {
                 sinkSelectorComboBox.Enabled = true;
                 sinkBaudRateComboBox.Enabled = true;
+                if (serialCheckBox.Checked)
+                {
+                    MessageBox.Show("Failed to start Serial sink\nBaud rate is invalid", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                serialCheckBox.Checked = false;
 
                 transmitter.DisableSerialSink();
             }
@@ -1027,28 +1077,30 @@ namespace ClientRtkGps
 
         private void tcpClientCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (tcpClientCheckBox.Checked)
-            {
-                tcpClientTextBox.Enabled = false;
-                tcpClientPortTextBox.Enabled = false;
-
-                if (Int32.TryParse(tcpClientPortTextBox.Text, out int port))
-                {
+            if (tcpClientCheckBox.Checked && Int32.TryParse(tcpClientPortTextBox.Text, out int port))
+            {                     
                     try
                     {
                         transmitter.SetTcpClientSink(tcpClientTextBox.Text, port);
+                        tcpClientTextBox.Enabled = false;
+                        tcpClientPortTextBox.Enabled = false;
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex);
+                        MessageBox.Show("Failed to start TCP client sink\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         tcpClientCheckBox.Checked = false;
                     }
-                }
             }
             else
             {
                 tcpClientTextBox.Enabled = true;
                 tcpClientPortTextBox.Enabled = true;
+                if (tcpClientCheckBox.Checked)
+                {
+                    MessageBox.Show("Failed to start TCP client sink\nPort is invalid", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                tcpClientCheckBox.Checked = false;
 
                 transmitter.DisableTcpClientSink();
             }
@@ -1056,32 +1108,34 @@ namespace ClientRtkGps
 
         private void tcpServerCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (tcpServerCheckBox.Checked)
-            {
-                tcpServerTextBox.Enabled = false;
-                tcpServerPortTextBox.Enabled = false;
-
-                if (Int32.TryParse(tcpServerPortTextBox.Text, out int port))
-                {
+            if (tcpServerCheckBox.Checked && Int32.TryParse(tcpServerPortTextBox.Text, out int port))
+            {           
                     try
                     {
                         transmitter.SetTcpServerSink(port);
+                        tcpServerTextBox.Enabled = false;
+                        tcpServerPortTextBox.Enabled = false;
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex);
+                        MessageBox.Show("Failed to start TCP server sink\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         tcpServerCheckBox.Checked = false;
                     }
-                }
             }
             else
             {
                 tcpServerTextBox.Enabled = true;
                 tcpServerPortTextBox.Enabled = true;
+                if (tcpServerCheckBox.Checked)
+                {
+                    MessageBox.Show("Failed to start TCP server sink\nPort is invalid", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                }
+                tcpServerCheckBox.Checked = false;
 
                 transmitter.DisableTcpServerSink();
             }
-
         }
 
         private void buttonConnect_Click(object sender, EventArgs e)
@@ -1245,6 +1299,7 @@ namespace ClientRtkGps
             System.Xml.Serialization.XmlSerializer writer =
                 new System.Xml.Serialization.XmlSerializer(typeof(List<NamedPointLatLngAlt>), new Type[] { typeof(Color) });
 
+            Directory.CreateDirectory(Path.GetDirectoryName(basepostlistfile));
             using (StreamWriter sw = new StreamWriter(basepostlistfile))
             {
                 writer.Serialize(sw, baseposList);
@@ -1255,17 +1310,23 @@ namespace ClientRtkGps
         {
             if (e.ColumnIndex == Use.Index)
             {
-                // TODO: implement (?)
-                /*
-                Settings.Instance["base_pos"] = String.Format("{0},{1},{2},{3}",
-                    dg_basepos[Lat.Index, e.RowIndex].Value.ToInvariantString(),
-                    dg_basepos[Long.Index, e.RowIndex].Value.ToInvariantString(),
-                    dg_basepos[Alt.Index, e.RowIndex].Value.ToInvariantString(),
-                    dg_basepos[BaseName1.Index, e.RowIndex].Value);
-                */
-
-                loadBasePOS();
-
+                double lat, lng, alt;
+                try
+                {
+                    lat = double.Parse(dg_basepos[Lat.Index, e.RowIndex].Value.ToInvariantString(), CultureInfo.InvariantCulture);
+                    lng = double.Parse(dg_basepos[Lng.Index, e.RowIndex].Value.ToInvariantString(), CultureInfo.InvariantCulture);
+                    alt = double.Parse(dg_basepos[Alt.Index, e.RowIndex].Value.ToInvariantString(), CultureInfo.InvariantCulture);
+                }
+                catch
+                {
+                    MessageBox.Show("Cound not parse values to double. Line 1268.");
+                    return;
+                }
+                loadCustomPOS(
+                    lat,
+                    lng,
+                    alt
+                    );
                 if (comPort != null && comPort.IsOpen)
                 {
                     if (int.TryParse(timeTextBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int time) &&
@@ -1276,7 +1337,7 @@ namespace ClientRtkGps
                     }
                     else
                     {
-                        // TODO: some error message
+                        MessageBox.Show("Cound not parse values to double or int. Line 1286.");
                     }
                 }
             }
@@ -1287,26 +1348,20 @@ namespace ClientRtkGps
             }
         }
 
-        private void loadBasePOS()
+        private void loadCustomPOS(double lat, double lng, double alt)
         {
-            // TODO: loadBasePOS();
-            /*
             try
             {
-                string[] bspos = Settings.Instance["base_pos"].Split(',');
-
-                log.Info("basepos: " + Settings.Instance["base_pos"].ToString());
-
-                basepos = new PointLatLngAlt(double.Parse(bspos[0], CultureInfo.InvariantCulture),
-                    double.Parse(bspos[1], CultureInfo.InvariantCulture),
-                    double.Parse(bspos[2], CultureInfo.InvariantCulture),
-                    bspos[3]);
+                basepos = new MyPointLatLngAlt(lat, lng, alt);
             }
             catch
             {
-                basepos = PointLatLngAlt.Zero;
+                basepos = MyPointLatLngAlt.Zero;
             }
-            */
+        }
+
+        private void loadBasePOS()
+        {
             basepos = MyPointLatLngAlt.Zero;
         }
 
@@ -1407,17 +1462,35 @@ namespace ClientRtkGps
         private void Form1_Shown(object sender, EventArgs e)
         {
             updateInormation();
+
+            Text = "RTK Client " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (MessageBox.Show(
+                    "Application will be closed.\nAre you sure?",
+                    "Application exit confirmation",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question) == DialogResult.No)
+            {
+                e.Cancel = true;
+                return;
+            }
+
             threadrun = false;
             SaveSettings();
         }
-
-        private void injectMsgTypeCheckBox_CheckedChanged(object sender, EventArgs e)
+              
+        private void overrideIDCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            rtcm_msg = injectMsgTypeCheckBox.Checked;
+            override_id = overrideIDCheckBox.Checked;
+            overrideIDTextBox.Enabled = override_id;
+        }
+
+        private void mavMsgTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            rtcm_msg = (MavMsgsPackedType)mavMsgTypeComboBox.SelectedIndex;
         }
     }
 }

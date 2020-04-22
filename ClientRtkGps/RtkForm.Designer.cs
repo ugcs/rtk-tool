@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RtkForm));
             this.sourceSelectorComboBox = new System.Windows.Forms.ComboBox();
             this.sourceBaudRateComboBox = new System.Windows.Forms.ComboBox();
             this.sinkSelectorComboBox = new System.Windows.Forms.ComboBox();
@@ -93,10 +94,13 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.radioLinkCheckBox = new System.Windows.Forms.CheckBox();
-            this.injectMsgTypeCheckBox = new System.Windows.Forms.CheckBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.signalStrengthHeaderLabel = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.mavMsgTypeComboBox = new System.Windows.Forms.ComboBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.overrideIDTextBox = new System.Windows.Forms.TextBox();
+            this.overrideIDCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -176,7 +180,7 @@
             "19200",
             "28800",
             "38400",
-            "56700",
+            "57600",
             "115200",
             "500000",
             "1000000"});
@@ -742,18 +746,6 @@
             this.radioLinkCheckBox.Text = "3DR Radio link";
             this.radioLinkCheckBox.UseVisualStyleBackColor = true;
             // 
-            // injectMsgTypeCheckBox
-            // 
-            this.injectMsgTypeCheckBox.AutoSize = true;
-            this.injectMsgTypeCheckBox.Location = new System.Drawing.Point(15, 137);
-            this.injectMsgTypeCheckBox.Margin = new System.Windows.Forms.Padding(2);
-            this.injectMsgTypeCheckBox.Name = "injectMsgTypeCheckBox";
-            this.injectMsgTypeCheckBox.Size = new System.Drawing.Size(106, 17);
-            this.injectMsgTypeCheckBox.TabIndex = 44;
-            this.injectMsgTypeCheckBox.Text = "Inject MSG Type";
-            this.injectMsgTypeCheckBox.UseVisualStyleBackColor = true;
-            this.injectMsgTypeCheckBox.CheckedChanged += new System.EventHandler(this.injectMsgTypeCheckBox_CheckedChanged);
-            // 
             // panel1
             // 
             this.panel1.AutoScroll = true;
@@ -762,7 +754,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(10, 10);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(222, 567);
+            this.panel1.Size = new System.Drawing.Size(207, 567);
             this.panel1.TabIndex = 45;
             // 
             // signalStrengthHeaderLabel
@@ -786,9 +778,12 @@
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.AutoScroll = true;
+            this.splitContainer1.Panel1.Controls.Add(this.mavMsgTypeComboBox);
+            this.splitContainer1.Panel1.Controls.Add(this.label15);
+            this.splitContainer1.Panel1.Controls.Add(this.overrideIDTextBox);
+            this.splitContainer1.Panel1.Controls.Add(this.overrideIDCheckBox);
             this.splitContainer1.Panel1.Controls.Add(this.label1);
             this.splitContainer1.Panel1.Controls.Add(this.radioLinkCheckBox);
-            this.splitContainer1.Panel1.Controls.Add(this.injectMsgTypeCheckBox);
             this.splitContainer1.Panel1.Controls.Add(this.m8pCheckBox);
             this.splitContainer1.Panel1.Controls.Add(this.sourceSelectorComboBox);
             this.splitContainer1.Panel1.Controls.Add(this.m8pGroupBox);
@@ -819,10 +814,53 @@
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
             this.splitContainer1.Panel2.Padding = new System.Windows.Forms.Padding(10);
             this.splitContainer1.Size = new System.Drawing.Size(896, 587);
-            this.splitContainer1.SplitterDistance = 653;
+            this.splitContainer1.SplitterDistance = 668;
             this.splitContainer1.SplitterWidth = 1;
             this.splitContainer1.TabIndex = 46;
             this.splitContainer1.TabStop = false;
+            // 
+            // mavMsgTypeComboBox
+            // 
+            this.mavMsgTypeComboBox.FormattingEnabled = true;
+            this.mavMsgTypeComboBox.Items.AddRange(new object[] {
+            "GPS_RTCM_DATA",
+            "GPS_INJECT_DATA",
+            "DATA96"});
+            this.mavMsgTypeComboBox.Location = new System.Drawing.Point(95, 161);
+            this.mavMsgTypeComboBox.Name = "mavMsgTypeComboBox";
+            this.mavMsgTypeComboBox.Size = new System.Drawing.Size(123, 21);
+            this.mavMsgTypeComboBox.TabIndex = 48;
+            this.mavMsgTypeComboBox.SelectedIndexChanged += new System.EventHandler(this.mavMsgTypeComboBox_SelectedIndexChanged);
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(18, 164);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(51, 13);
+            this.label15.TabIndex = 47;
+            this.label15.Text = "Mav Msg";
+            // 
+            // overrideIDTextBox
+            // 
+            this.overrideIDTextBox.Enabled = false;
+            this.overrideIDTextBox.Location = new System.Drawing.Point(506, 366);
+            this.overrideIDTextBox.Name = "overrideIDTextBox";
+            this.overrideIDTextBox.Size = new System.Drawing.Size(54, 20);
+            this.overrideIDTextBox.TabIndex = 46;
+            this.overrideIDTextBox.Text = "1";
+            // 
+            // overrideIDCheckBox
+            // 
+            this.overrideIDCheckBox.AutoSize = true;
+            this.overrideIDCheckBox.Location = new System.Drawing.Point(330, 368);
+            this.overrideIDCheckBox.Margin = new System.Windows.Forms.Padding(2);
+            this.overrideIDCheckBox.Name = "overrideIDCheckBox";
+            this.overrideIDCheckBox.Size = new System.Drawing.Size(171, 17);
+            this.overrideIDCheckBox.TabIndex = 45;
+            this.overrideIDCheckBox.Text = "Override Station ID (max 4095)";
+            this.overrideIDCheckBox.UseVisualStyleBackColor = true;
+            this.overrideIDCheckBox.CheckedChanged += new System.EventHandler(this.overrideIDCheckBox_CheckedChanged);
             // 
             // RtkForm
             // 
@@ -830,6 +868,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(896, 587);
             this.Controls.Add(this.splitContainer1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "RtkForm";
             this.Text = "RTK Client";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -920,10 +959,13 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.CheckBox radioLinkCheckBox;
-        private System.Windows.Forms.CheckBox injectMsgTypeCheckBox;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label signalStrengthHeaderLabel;
         private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.CheckBox overrideIDCheckBox;
+        private System.Windows.Forms.TextBox overrideIDTextBox;
+        private System.Windows.Forms.ComboBox mavMsgTypeComboBox;
+        private System.Windows.Forms.Label label15;
     }
 }
 

@@ -250,7 +250,7 @@ namespace MissionPlanner.Utilities
             return -1;
         }
 
-        private static uint getbitu(byte[] buff, uint pos, uint len)
+        public static uint getbitu(byte[] buff, uint pos, uint len)
         {
             uint bits = 0;
             uint i;
@@ -259,7 +259,7 @@ namespace MissionPlanner.Utilities
             return bits;
         }
 
-        private static void setbitu(byte[] buff, uint pos, uint len, uint data)
+        public static void setbitu(byte[] buff, uint pos, uint len, uint data)
         {
             var mask = 1u << (int) (len - 1);
 

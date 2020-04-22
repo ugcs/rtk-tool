@@ -290,7 +290,17 @@ using System.Reflection;
 		/// Camera
 		/// </summary>
 		MAV_TYPE_CAMERA = 30,
-		MAV_TYPE_ENUM_END = 31,
+
+		/// <summary>
+		/// Charging station
+		/// </summary>
+		MAV_TYPE_CHARGING_STATION = 31,
+
+		/// <summary>
+		/// Onboard FLARM collision avoidance system
+		/// </summary>
+		MAV_TYPE_FLARM = 32,
+		MAV_TYPE_ENUM_END = 33,
 
 	}
 
@@ -326,86 +336,6 @@ using System.Reflection;
 		/// </summary>
 		FIRMWARE_VERSION_TYPE_OFFICIAL = 255,
 		FIRMWARE_VERSION_TYPE_ENUM_END = 256,
-
-	}
-
-
-	/// <summary>
-	/// Flags to report failure cases over the high latency telemtry.
-	/// </summary>
-	public enum HL_FAILURE_FLAG : uint
-	{
-
-		/// <summary>
-		/// GPS failure.
-		/// </summary>
-		HL_FAILURE_FLAG_GPS = 1,
-
-		/// <summary>
-		/// Differential pressure sensor failure.
-		/// </summary>
-		HL_FAILURE_FLAG_DIFFERENTIAL_PRESSURE = 2,
-
-		/// <summary>
-		/// Absolute pressure sensor failure.
-		/// </summary>
-		HL_FAILURE_FLAG_ABSOLUTE_PRESSURE = 4,
-
-		/// <summary>
-		/// Accelerometer sensor failure.
-		/// </summary>
-		HL_FAILURE_FLAG_3D_ACCEL = 8,
-
-		/// <summary>
-		/// Gyroscope sensor failure.
-		/// </summary>
-		HL_FAILURE_FLAG_3D_GYRO = 16,
-
-		/// <summary>
-		/// Magnetometer sensor failure.
-		/// </summary>
-		HL_FAILURE_FLAG_3D_MAG = 32,
-
-		/// <summary>
-		/// Terrain subsystem failure.
-		/// </summary>
-		HL_FAILURE_FLAG_TERRAIN = 64,
-
-		/// <summary>
-		/// Battery failure/critical low battery.
-		/// </summary>
-		HL_FAILURE_FLAG_BATTERY = 128,
-
-		/// <summary>
-		/// RC receiver failure/no rc connection.
-		/// </summary>
-		HL_FAILURE_FLAG_RC_RECEIVER = 256,
-
-		/// <summary>
-		/// Offboard link failure.
-		/// </summary>
-		HL_FAILURE_FLAG_OFFBOARD_LINK = 512,
-
-		/// <summary>
-		/// Engine failure.
-		/// </summary>
-		HL_FAILURE_FLAG_ENGINE = 1024,
-
-		/// <summary>
-		/// Geofence violation.
-		/// </summary>
-		HL_FAILURE_FLAG_GEOFENCE = 2048,
-
-		/// <summary>
-		/// Estimator failure, for example measurement rejection or large variances.
-		/// </summary>
-		HL_FAILURE_FLAG_ESTIMATOR = 4096,
-
-		/// <summary>
-		/// Mission failure.
-		/// </summary>
-		HL_FAILURE_FLAG_MISSION = 8192,
-		HL_FAILURE_FLAG_ENUM_END = 8193,
 
 	}
 
@@ -669,11 +599,6 @@ using System.Reflection;
 		MAV_COMP_ID_ALL = 0,
 		MAV_COMP_ID_AUTOPILOT1 = 1,
 		MAV_COMP_ID_CAMERA = 100,
-		MAV_COMP_ID_CAMERA2 = 101,
-		MAV_COMP_ID_CAMERA3 = 102,
-		MAV_COMP_ID_CAMERA4 = 103,
-		MAV_COMP_ID_CAMERA5 = 104,
-		MAV_COMP_ID_CAMERA6 = 105,
 		MAV_COMP_ID_SERVO1 = 140,
 		MAV_COMP_ID_SERVO2 = 141,
 		MAV_COMP_ID_SERVO3 = 142,
@@ -702,6 +627,7 @@ using System.Reflection;
 		/// </summary>
 		MAV_COMP_ID_PERIPHERAL = 158,
 		MAV_COMP_ID_QX1_GIMBAL = 159,
+		MAV_COMP_ID_FLARM = 160,
 		MAV_COMP_ID_MAPPER = 180,
 		MAV_COMP_ID_MISSIONPLANNER = 190,
 		MAV_COMP_ID_PATHPLANNER = 195,
@@ -853,7 +779,12 @@ using System.Reflection;
 		/// 0x2000000 Battery
 		/// </summary>
 		MAV_SYS_STATUS_SENSOR_BATTERY = 33554432,
-		MAV_SYS_STATUS_SENSOR_ENUM_END = 33554433,
+
+		/// <summary>
+		/// 0x4000000 Proximity
+		/// </summary>
+		MAV_SYS_STATUS_SENSOR_PROXIMITY = 67108864,
+		MAV_SYS_STATUS_SENSOR_ENUM_END = 67108865,
 
 	}
 
@@ -865,12 +796,12 @@ using System.Reflection;
 	{
 
 		/// <summary>
-		/// Global coordinate frame, WGS84 coordinate system. First value / x: latitude, second value / y: longitude, third value / z: positive altitude over mean sea level (MSL)
+		/// Global coordinate frame, WGS84 coordinate system. First value / x: latitude, second value / y: longitude, third value / z: positive altitude over mean sea level (MSL).
 		/// </summary>
 		MAV_FRAME_GLOBAL = 0,
 
 		/// <summary>
-		/// Local coordinate frame, Z-up (x: north, y: east, z: down).
+		/// Local coordinate frame, Z-down (x: north, y: east, z: down).
 		/// </summary>
 		MAV_FRAME_LOCAL_NED = 1,
 
@@ -885,12 +816,12 @@ using System.Reflection;
 		MAV_FRAME_GLOBAL_RELATIVE_ALT = 3,
 
 		/// <summary>
-		/// Local coordinate frame, Z-down (x: east, y: north, z: up)
+		/// Local coordinate frame, Z-up (x: east, y: north, z: up).
 		/// </summary>
 		MAV_FRAME_LOCAL_ENU = 4,
 
 		/// <summary>
-		/// Global coordinate frame, WGS84 coordinate system. First value / x: latitude in degrees*1.0e-7, second value / y: longitude in degrees*1.0e-7, third value / z: positive altitude over mean sea level (MSL)
+		/// Global coordinate frame, WGS84 coordinate system. First value / x: latitude in degrees*1.0e-7, second value / y: longitude in degrees*1.0e-7, third value / z: positive altitude over mean sea level (MSL).
 		/// </summary>
 		MAV_FRAME_GLOBAL_INT = 5,
 
@@ -923,7 +854,47 @@ using System.Reflection;
 		/// Global coordinate frame with above terrain level altitude. WGS84 coordinate system, relative altitude over terrain with respect to the waypoint coordinate. First value / x: latitude in degrees*10e-7, second value / y: longitude in degrees*10e-7, third value / z: positive altitude in meters with 0 being at ground level in terrain model.
 		/// </summary>
 		MAV_FRAME_GLOBAL_TERRAIN_ALT_INT = 11,
-		MAV_FRAME_ENUM_END = 12,
+
+		/// <summary>
+		/// Body fixed frame of reference, Z-down (x: forward, y: right, z: down).
+		/// </summary>
+		MAV_FRAME_BODY_FRD = 12,
+
+		/// <summary>
+		/// Body fixed frame of reference, Z-up (x: forward, y: left, z: up).
+		/// </summary>
+		MAV_FRAME_BODY_FLU = 13,
+
+		/// <summary>
+		/// Odometry local coordinate frame of data given by a motion capture system, Z-down (x: north, y: east, z: down).
+		/// </summary>
+		MAV_FRAME_MOCAP_NED = 14,
+
+		/// <summary>
+		/// Odometry local coordinate frame of data given by a motion capture system, Z-up (x: east, y: north, z: up).
+		/// </summary>
+		MAV_FRAME_MOCAP_ENU = 15,
+
+		/// <summary>
+		/// Odometry local coordinate frame of data given by a vision estimation system, Z-down (x: north, y: east, z: down).
+		/// </summary>
+		MAV_FRAME_VISION_NED = 16,
+
+		/// <summary>
+		/// Odometry local coordinate frame of data given by a vision estimation system, Z-up (x: east, y: north, z: up).
+		/// </summary>
+		MAV_FRAME_VISION_ENU = 17,
+
+		/// <summary>
+		/// Odometry local coordinate frame of data given by an estimator running onboard the vehicle, Z-down (x: north, y: east, z: down).
+		/// </summary>
+		MAV_FRAME_ESTIM_NED = 18,
+
+		/// <summary>
+		/// Odometry local coordinate frame of data given by an estimator running onboard the vehicle, Z-up (x: east, y: noth, z: up).
+		/// </summary>
+		MAV_FRAME_ESTIM_ENU = 19,
+		MAV_FRAME_ENUM_END = 20,
 
 	}
 
@@ -1366,12 +1337,12 @@ using System.Reflection;
 		MAV_CMD_DO_SET_ROI = 201,
 
 		/// <summary>
-		/// THIS INTERFACE IS DEPRECATED since 2018-01. Please use PARAM_EXT_XXX messages and the camera definition format described in https://mavlink.io/en/protocol/camera_def.html.
+		/// Mission command to configure an on-board camera controller system.
 		/// </summary>
 		MAV_CMD_DO_DIGICAM_CONFIGURE = 202,
 
 		/// <summary>
-		/// THIS INTERFACE IS DEPRECATED since 2018-01. Please use PARAM_EXT_XXX messages and the camera definition format described in https://mavlink.io/en/protocol/camera_def.html.
+		/// Mission command to control an on-board camera controller system.
 		/// </summary>
 		MAV_CMD_DO_DIGICAM_CONTROL = 203,
 
@@ -1506,37 +1477,42 @@ using System.Reflection;
 		MAV_CMD_SET_MESSAGE_INTERVAL = 511,
 
 		/// <summary>
-		/// Request MAVLink protocol version compatibility
-		/// </summary>
-		MAV_CMD_REQUEST_PROTOCOL_VERSION = 519,
-
-		/// <summary>
 		/// Request autopilot capabilities
 		/// </summary>
 		MAV_CMD_REQUEST_AUTOPILOT_CAPABILITIES = 520,
 
 		/// <summary>
-		/// Request camera information (CAMERA_INFORMATION).
+		/// WIP: Request camera information (CAMERA_INFORMATION)
 		/// </summary>
 		MAV_CMD_REQUEST_CAMERA_INFORMATION = 521,
 
 		/// <summary>
-		/// Request camera settings (CAMERA_SETTINGS).
+		/// WIP: Request camera settings (CAMERA_SETTINGS)
 		/// </summary>
 		MAV_CMD_REQUEST_CAMERA_SETTINGS = 522,
 
 		/// <summary>
-		/// WIP: Request storage information (STORAGE_INFORMATION). Use the command's target_component to target a specific component's storage.
+		/// WIP: Set the camera settings part 1 (CAMERA_SETTINGS)
+		/// </summary>
+		MAV_CMD_SET_CAMERA_SETTINGS_1 = 523,
+
+		/// <summary>
+		/// WIP: Set the camera settings part 2 (CAMERA_SETTINGS)
+		/// </summary>
+		MAV_CMD_SET_CAMERA_SETTINGS_2 = 524,
+
+		/// <summary>
+		/// WIP: Request storage information (STORAGE_INFORMATION)
 		/// </summary>
 		MAV_CMD_REQUEST_STORAGE_INFORMATION = 525,
 
 		/// <summary>
-		/// WIP: Format a storage medium. Once format is complete, a STORAGE_INFORMATION message is sent. Use the command's target_component to target a specific component's storage.
+		/// WIP: Format a storage medium
 		/// </summary>
 		MAV_CMD_STORAGE_FORMAT = 526,
 
 		/// <summary>
-		/// Request camera capture status (CAMERA_CAPTURE_STATUS)
+		/// WIP: Request camera capture status (CAMERA_CAPTURE_STATUS)
 		/// </summary>
 		MAV_CMD_REQUEST_CAMERA_CAPTURE_STATUS = 527,
 
@@ -1544,11 +1520,6 @@ using System.Reflection;
 		/// WIP: Request flight information (FLIGHT_INFORMATION)
 		/// </summary>
 		MAV_CMD_REQUEST_FLIGHT_INFORMATION = 528,
-
-		/// <summary>
-		/// Reset all camera settings to Factory Default
-		/// </summary>
-		MAV_CMD_RESET_CAMERA_SETTINGS = 529,
 
 		/// <summary>
 		/// Set camera running mode. Use NAN for reserved values.
@@ -1561,14 +1532,9 @@ using System.Reflection;
 		MAV_CMD_IMAGE_START_CAPTURE = 2000,
 
 		/// <summary>
-		/// Stop image capture sequence Use NAN for reserved values.
+		/// Stop image capture sequence
 		/// </summary>
 		MAV_CMD_IMAGE_STOP_CAPTURE = 2001,
-
-		/// <summary>
-		/// WIP: Re-request a CAMERA_IMAGE_CAPTURE packet. Use NAN for reserved values.
-		/// </summary>
-		MAV_CMD_REQUEST_CAMERA_IMAGE_CAPTURE = 2002,
 
 		/// <summary>
 		/// Enable or disable on-board camera triggering system.
@@ -1576,29 +1542,14 @@ using System.Reflection;
 		MAV_CMD_DO_TRIGGER_CONTROL = 2003,
 
 		/// <summary>
-		/// Starts video capture (recording). Use NAN for reserved values.
+		/// Starts video capture (recording)
 		/// </summary>
 		MAV_CMD_VIDEO_START_CAPTURE = 2500,
 
 		/// <summary>
-		/// Stop the current video capture (recording). Use NAN for reserved values.
+		/// Stop the current video capture (recording)
 		/// </summary>
 		MAV_CMD_VIDEO_STOP_CAPTURE = 2501,
-
-		/// <summary>
-		/// WIP: Start video streaming
-		/// </summary>
-		MAV_CMD_VIDEO_START_STREAMING = 2502,
-
-		/// <summary>
-		/// WIP: Stop the current video streaming
-		/// </summary>
-		MAV_CMD_VIDEO_STOP_STREAMING = 2503,
-
-		/// <summary>
-		/// WIP: Request video stream information (VIDEO_STREAM_INFORMATION)
-		/// </summary>
-		MAV_CMD_REQUEST_VIDEO_STREAM_INFORMATION = 2504,
 
 		/// <summary>
 		/// Request to start streaming logging data over MAVLink (see also LOGGING_DATA message)
@@ -1643,11 +1594,6 @@ using System.Reflection;
 		///                  
 		/// </summary>
 		MAV_CMD_SET_GUIDED_SUBMODE_CIRCLE = 4001,
-
-		/// <summary>
-		/// WIP: Delay mission state machine until gate has been reached.
-		/// </summary>
-		MAV_CMD_CONDITION_GATE = 4501,
 
 		/// <summary>
 		/// Fence return point. There can only be one fence return point.
@@ -1850,7 +1796,7 @@ using System.Reflection;
 		MAV_ROI_NONE = 0,
 
 		/// <summary>
-		/// Point toward next waypoint, with optional pitch/roll/yaw offset.
+		/// Point toward next waypoint.
 		/// </summary>
 		MAV_ROI_WPNEXT = 1,
 
@@ -1989,71 +1935,6 @@ using System.Reflection;
 
 
 	/// <summary>
-	/// Specifies the datatype of a MAVLink extended parameter.
-	/// </summary>
-	public enum MAV_PARAM_EXT_TYPE : uint
-	{
-
-		/// <summary>
-		/// 8-bit unsigned integer
-		/// </summary>
-		MAV_PARAM_EXT_TYPE_UINT8 = 1,
-
-		/// <summary>
-		/// 8-bit signed integer
-		/// </summary>
-		MAV_PARAM_EXT_TYPE_INT8 = 2,
-
-		/// <summary>
-		/// 16-bit unsigned integer
-		/// </summary>
-		MAV_PARAM_EXT_TYPE_UINT16 = 3,
-
-		/// <summary>
-		/// 16-bit signed integer
-		/// </summary>
-		MAV_PARAM_EXT_TYPE_INT16 = 4,
-
-		/// <summary>
-		/// 32-bit unsigned integer
-		/// </summary>
-		MAV_PARAM_EXT_TYPE_UINT32 = 5,
-
-		/// <summary>
-		/// 32-bit signed integer
-		/// </summary>
-		MAV_PARAM_EXT_TYPE_INT32 = 6,
-
-		/// <summary>
-		/// 64-bit unsigned integer
-		/// </summary>
-		MAV_PARAM_EXT_TYPE_UINT64 = 7,
-
-		/// <summary>
-		/// 64-bit signed integer
-		/// </summary>
-		MAV_PARAM_EXT_TYPE_INT64 = 8,
-
-		/// <summary>
-		/// 32-bit floating-point
-		/// </summary>
-		MAV_PARAM_EXT_TYPE_REAL32 = 9,
-
-		/// <summary>
-		/// 64-bit floating-point
-		/// </summary>
-		MAV_PARAM_EXT_TYPE_REAL64 = 10,
-
-		/// <summary>
-		/// Custom Type
-		/// </summary>
-		MAV_PARAM_EXT_TYPE_CUSTOM = 11,
-		MAV_PARAM_EXT_TYPE_ENUM_END = 12,
-
-	}
-
-
-	/// <summary>
 	/// result from a mavlink command
 	/// </summary>
 	public enum MAV_RESULT : uint
@@ -2083,12 +1964,7 @@ using System.Reflection;
 		/// Command executed, but failed
 		/// </summary>
 		MAV_RESULT_FAILED = 4,
-
-		/// <summary>
-		/// WIP: Command being executed
-		/// </summary>
-		MAV_RESULT_IN_PROGRESS = 5,
-		MAV_RESULT_ENUM_END = 6,
+		MAV_RESULT_ENUM_END = 5,
 
 	}
 
@@ -2809,6 +2685,51 @@ using System.Reflection;
 
 
 	/// <summary>
+	/// Enumeration for low battery states.
+	/// </summary>
+	public enum MAV_BATTERY_CHARGE_STATE : uint
+	{
+
+		/// <summary>
+		/// Low battery state is not provided
+		/// </summary>
+		MAV_BATTERY_CHARGE_STATE_UNDEFINED = 0,
+
+		/// <summary>
+		/// Battery is not in low state. Normal operation.
+		/// </summary>
+		MAV_BATTERY_CHARGE_STATE_OK = 1,
+
+		/// <summary>
+		/// Battery state is low, warn and monitor close.
+		/// </summary>
+		MAV_BATTERY_CHARGE_STATE_LOW = 2,
+
+		/// <summary>
+		/// Battery state is critical, return or abort immediately.
+		/// </summary>
+		MAV_BATTERY_CHARGE_STATE_CRITICAL = 3,
+
+		/// <summary>
+		/// Battery state is too low for ordinary abort sequence. Perform fastest possible emergency stop to prevent damage.
+		/// </summary>
+		MAV_BATTERY_CHARGE_STATE_EMERGENCY = 4,
+
+		/// <summary>
+		/// Battery failed, damage unavoidable.
+		/// </summary>
+		MAV_BATTERY_CHARGE_STATE_FAILED = 5,
+
+		/// <summary>
+		/// Battery is diagnosed to be defective or an error occurred, usage is discouraged / prohibited.
+		/// </summary>
+		MAV_BATTERY_CHARGE_STATE_UNHEALTHY = 6,
+		MAV_BATTERY_CHARGE_STATE_ENUM_END = 7,
+
+	}
+
+
+	/// <summary>
 	/// Enumeration of VTOL states
 	/// </summary>
 	public enum MAV_VTOL_STATE : uint
@@ -3281,6 +3202,26 @@ using System.Reflection;
 
 
 	/// <summary>
+	/// RTK GPS baseline coordinate system, used for RTK corrections
+	/// </summary>
+	public enum RTK_BASELINE_COORDINATE_SYSTEM : uint
+	{
+
+		/// <summary>
+		/// Earth-centered, Earth-fixed
+		/// </summary>
+		RTK_BASELINE_COORDINATE_SYSTEM_ECEF = 0,
+
+		/// <summary>
+		/// North, East, Down
+		/// </summary>
+		RTK_BASELINE_COORDINATE_SYSTEM_NED = 1,
+		RTK_BASELINE_COORDINATE_SYSTEM_ENUM_END = 2,
+
+	}
+
+
+	/// <summary>
 	/// Type of landing target
 	/// </summary>
 	public enum LANDING_TARGET_TYPE : uint
@@ -3341,76 +3282,6 @@ using System.Reflection;
 		/// </summary>
 		VTOL_TRANSITION_HEADING_ANY = 4,
 		VTOL_TRANSITION_HEADING_ENUM_END = 5,
-
-	}
-
-
-	/// <summary>
-	/// Camera capability flags (Bitmap).
-	/// </summary>
-	public enum CAMERA_CAP_FLAGS : uint
-	{
-
-		/// <summary>
-		/// Camera is able to record video.
-		/// </summary>
-		CAMERA_CAP_FLAGS_CAPTURE_VIDEO = 1,
-
-		/// <summary>
-		/// Camera is able to capture images.
-		/// </summary>
-		CAMERA_CAP_FLAGS_CAPTURE_IMAGE = 2,
-
-		/// <summary>
-		/// Camera has separate Video and Image/Photo modes (MAV_CMD_SET_CAMERA_MODE)
-		/// </summary>
-		CAMERA_CAP_FLAGS_HAS_MODES = 4,
-
-		/// <summary>
-		/// Camera can capture images while in video mode
-		/// </summary>
-		CAMERA_CAP_FLAGS_CAN_CAPTURE_IMAGE_IN_VIDEO_MODE = 8,
-
-		/// <summary>
-		/// Camera can capture videos while in Photo/Image mode
-		/// </summary>
-		CAMERA_CAP_FLAGS_CAN_CAPTURE_VIDEO_IN_IMAGE_MODE = 16,
-
-		/// <summary>
-		/// Camera has image survey mode (MAV_CMD_SET_CAMERA_MODE)
-		/// </summary>
-		CAMERA_CAP_FLAGS_HAS_IMAGE_SURVEY_MODE = 32,
-		CAMERA_CAP_FLAGS_ENUM_END = 33,
-
-	}
-
-
-	/// <summary>
-	/// Result from a PARAM_EXT_SET message.
-	/// </summary>
-	public enum PARAM_ACK : uint
-	{
-
-		/// <summary>
-		/// Parameter value ACCEPTED and SET
-		/// </summary>
-		PARAM_ACK_ACCEPTED = 0,
-
-		/// <summary>
-		/// Parameter value UNKNOWN/UNSUPPORTED
-		/// </summary>
-		PARAM_ACK_VALUE_UNSUPPORTED = 1,
-
-		/// <summary>
-		/// Parameter failed to set
-		/// </summary>
-		PARAM_ACK_FAILED = 2,
-
-		/// <summary>
-		/// Parameter value received but not yet validated or set. A subsequent PARAM_EXT_ACK will follow once operation is completed with the actual result. These are for parameters that may take longer to set. Instead of waiting for an ACK and potentially timing out, you will immediately receive this response to let you know it was received.
-		/// </summary>
-		PARAM_ACK_IN_PROGRESS = 3,
-		PARAM_ACK_ENUM_END = 4,
 
 	}
 
@@ -3481,21 +3352,21 @@ using System.Reflection;
 
 
 	/// <summary>
-	/// RTK GPS baseline coordinate system, used for RTK corrections
+	/// RC type
 	/// </summary>
-	public enum RTK_BASELINE_COORDINATE_SYSTEM : uint
+	public enum RC_TYPE : uint
 	{
 
 		/// <summary>
-		/// Earth-centered, Earth-fixed
+		/// Spektrum DSM2
 		/// </summary>
-		RTK_BASELINE_COORDINATE_SYSTEM_ECEF = 0,
+		RC_TYPE_SPEKTRUM_DSM2 = 0,
 
 		/// <summary>
-		/// North, East, Down
+		/// Spektrum DSMX
 		/// </summary>
-		RTK_BASELINE_COORDINATE_SYSTEM_NED = 1,
-		RTK_BASELINE_COORDINATE_SYSTEM_ENUM_END = 2,
+		RC_TYPE_SPEKTRUM_DSMX = 1,
+		RC_TYPE_ENUM_END = 2,
 
 	}
 
@@ -3529,17 +3400,17 @@ namespace MavLink
 		public byte autopilot;
 
 		/// <summary>
-		/// System mode bitfield, see MAV_MODE_FLAG ENUM in mavlink/include/mavlink_types.h
+		/// System mode bitfield, as defined by MAV_MODE_FLAG enum
 		/// </summary>
 		public byte base_mode;
 
 		/// <summary>
-		/// A bitfield for use for autopilot-specific flags.
+		/// A bitfield for use for autopilot-specific flags
 		/// </summary>
 		public UInt32 custom_mode;
 
 		/// <summary>
-		/// System status flag, see MAV_STATE ENUM
+		/// System status flag, as defined by MAV_STATE enum
 		/// </summary>
 		public byte system_status;
 
@@ -3926,7 +3797,7 @@ namespace MavLink
 
 	/// <summary>
 	/// The global position, as returned by the Global Positioning System (GPS). This is
-	///                NOT the global position estimate of the system, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate. Coordinate frame is right-handed, Z-axis up (GPS frame).
+	///                NOT the global position estimate of the system, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate.
 	/// </summary>
 	public class Msg_gps_raw_int : MavlinkMessage
     {
@@ -4724,12 +4595,12 @@ namespace MavLink
 		public UInt16 seq;
 
 		/// <summary>
-		/// The coordinate system of the waypoint. see MAV_FRAME in mavlink_types.h
+		/// The coordinate system of the waypoint, as defined by MAV_FRAME enum
 		/// </summary>
 		public byte frame;
 
 		/// <summary>
-		/// The scheduled action for the waypoint. see MAV_CMD in common.xml MAVLink specs
+		/// The scheduled action for the waypoint, as defined by MAV_CMD enum
 		/// </summary>
 		public UInt16 command;
 
@@ -5143,7 +5014,7 @@ namespace MavLink
 		public byte target_component;
 
 		/// <summary>
-		/// Coordinate frame, as defined by MAV_FRAME enum in mavlink_types.h. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
+		/// Coordinate frame, as defined by MAV_FRAME enum. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
 		/// </summary>
 		public byte frame;
 
@@ -5191,7 +5062,7 @@ namespace MavLink
     {
 
 		/// <summary>
-		/// Coordinate frame, as defined by MAV_FRAME enum in mavlink_types.h. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
+		/// Coordinate frame, as defined by MAV_FRAME enum. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
 		/// </summary>
 		public byte frame;
 
@@ -5777,12 +5648,12 @@ namespace MavLink
 		public UInt16 seq;
 
 		/// <summary>
-		/// The coordinate system of the waypoint. see MAV_FRAME in mavlink_types.h
+		/// The coordinate system of the waypoint, as defined by MAV_FRAME enum
 		/// </summary>
 		public byte frame;
 
 		/// <summary>
-		/// The scheduled action for the waypoint. see MAV_CMD in common.xml MAVLink specs
+		/// The scheduled action for the waypoint, as defined by MAV_CMD enum
 		/// </summary>
 		public UInt16 command;
 
@@ -5898,12 +5769,12 @@ namespace MavLink
 		public byte target_component;
 
 		/// <summary>
-		/// The coordinate system of the COMMAND. see MAV_FRAME in mavlink_types.h
+		/// The coordinate system of the COMMAND, as defined by MAV_FRAME enum
 		/// </summary>
 		public byte frame;
 
 		/// <summary>
-		/// The scheduled action for the mission item. see MAV_CMD in common.xml MAVLink specs
+		/// The scheduled action for the mission item, as defined by MAV_CMD enum
 		/// </summary>
 		public UInt16 command;
 
@@ -7579,7 +7450,7 @@ namespace MavLink
 
 	/// <summary>
 	/// The global position, as returned by the Global Positioning System (GPS). This is
-	///                 NOT the global position estimate of the sytem, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate. Coordinate frame is right-handed, Z-axis up (GPS frame).
+	///                 NOT the global position estimate of the sytem, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate.
 	/// </summary>
 	public class Msg_hil_gps : MavlinkMessage
     {
@@ -8107,7 +7978,7 @@ namespace MavLink
 
 
 	/// <summary>
-	/// Second GPS data. Coordinate frame is right-handed, Z-axis up (GPS frame).
+	/// Second GPS data.
 	/// </summary>
 	public class Msg_gps2_raw : MavlinkMessage
     {
@@ -9325,6 +9196,34 @@ namespace MavLink
 
 
 	/// <summary>
+	/// Data packet, size 96
+	/// </summary>
+	public class Msg_data96 : MavlinkMessage
+    {
+
+		/// <summary>
+		/// data type
+		/// </summary>
+		public byte type;
+
+		/// <summary>
+		/// data length
+		/// </summary>
+		public byte len;
+
+		/// <summary>
+		/// raw data
+		/// </summary>
+		public byte[] data; // Array size 96
+
+        public override int Serialize(byte[] bytes, ref int offset)
+            {
+                return MavLinkSerializer.Serialize_DATA96(this, bytes, ref offset);
+            }        
+	}
+
+
+	/// <summary>
 	/// Estimator status message including flags, innovation test ratios and estimated accuracies. The flags message is an integer bitmask containing information on which EKF outputs are valid. See the ESTIMATOR_STATUS_FLAGS enum definition for further information. The innovaton test ratios show the magnitude of the sensor innovation divided by the innovation check threshold. Under normal operation the innovaton test ratios should be below 0.5 with occasional values up to 1.0. Values greater than 1.0 should be rare under normal operation and indicate that a measurement has been rejected by the filter. The user should be notified if an innovation test ratio greater than 1.0 is recorded. Notifications for values in the range between 0.5 and 1.0 should be optional and controllable by the user.
 	/// </summary>
 	public class Msg_estimator_status : MavlinkMessage
@@ -9579,7 +9478,7 @@ namespace MavLink
     {
 
 		/// <summary>
-		/// System mode bitfield, see MAV_MODE_FLAG ENUM in mavlink/include/mavlink_types.h
+		/// System mode bitfield, as defined by MAV_MODE_FLAG enum.
 		/// </summary>
 		public byte base_mode;
 
@@ -9701,154 +9600,6 @@ namespace MavLink
         public override int Serialize(byte[] bytes, ref int offset)
             {
                 return MavLinkSerializer.Serialize_HIGH_LATENCY(this, bytes, ref offset);
-            }        
-	}
-
-
-	/// <summary>
-	/// WIP: Message appropriate for high latency connections like Iridium (version 2)
-	/// </summary>
-	public class Msg_high_latency2 : MavlinkMessage
-    {
-
-		/// <summary>
-		/// Timestamp (milliseconds since boot or Unix epoch)
-		/// </summary>
-		public UInt32 timestamp;
-
-		/// <summary>
-		/// Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM)
-		/// </summary>
-		public byte type;
-
-		/// <summary>
-		/// Autopilot type / class. defined in MAV_AUTOPILOT ENUM
-		/// </summary>
-		public byte autopilot;
-
-		/// <summary>
-		/// A bitfield for use for autopilot-specific flags (2 byte version).
-		/// </summary>
-		public UInt16 custom_mode;
-
-		/// <summary>
-		/// Latitude, expressed as degrees * 1E7
-		/// </summary>
-		public Int32 latitude;
-
-		/// <summary>
-		/// Longitude, expressed as degrees * 1E7
-		/// </summary>
-		public Int32 longitude;
-
-		/// <summary>
-		/// Altitude above mean sea level
-		/// </summary>
-		public Int16 altitude;
-
-		/// <summary>
-		/// Altitude setpoint
-		/// </summary>
-		public Int16 target_altitude;
-
-		/// <summary>
-		/// Heading (degrees / 2)
-		/// </summary>
-		public byte heading;
-
-		/// <summary>
-		/// Heading setpoint (degrees / 2)
-		/// </summary>
-		public byte target_heading;
-
-		/// <summary>
-		/// Distance to target waypoint or position (meters / 10)
-		/// </summary>
-		public UInt16 target_distance;
-
-		/// <summary>
-		/// Throttle (percentage)
-		/// </summary>
-		public byte throttle;
-
-		/// <summary>
-		/// Airspeed (m/s * 5)
-		/// </summary>
-		public byte airspeed;
-
-		/// <summary>
-		/// Airspeed setpoint (m/s * 5)
-		/// </summary>
-		public byte airspeed_sp;
-
-		/// <summary>
-		/// Groundspeed (m/s * 5)
-		/// </summary>
-		public byte groundspeed;
-
-		/// <summary>
-		/// Windspeed (m/s * 5)
-		/// </summary>
-		public byte windspeed;
-
-		/// <summary>
-		/// Wind heading (deg / 2)
-		/// </summary>
-		public byte wind_heading;
-
-		/// <summary>
-		/// Maximum error horizontal position since last message (m * 10)
-		/// </summary>
-		public byte eph;
-
-		/// <summary>
-		/// Maximum error vertical position since last message (m * 10)
-		/// </summary>
-		public byte epv;
-
-		/// <summary>
-		/// Air temperature (degrees C) from airspeed sensor
-		/// </summary>
-		public sbyte temperature_air;
-
-		/// <summary>
-		/// Maximum climb rate magnitude since last message (m/s * 10)
-		/// </summary>
-		public sbyte climb_rate;
-
-		/// <summary>
-		/// Battery (percentage, -1 for DNU)
-		/// </summary>
-		public sbyte battery;
-
-		/// <summary>
-		/// Current waypoint number
-		/// </summary>
-		public UInt16 wp_num;
-
-		/// <summary>
-		/// Indicates failures as defined in HL_FAILURE_FLAG ENUM. 
-		/// </summary>
-		public UInt16 failure_flags;
-
-		/// <summary>
-		/// Field for custom payload.
-		/// </summary>
-		public sbyte custom0;
-
-		/// <summary>
-		/// Field for custom payload.
-		/// </summary>
-		public sbyte custom1;
-
-		/// <summary>
-		/// Field for custom payload.
-		/// </summary>
-		public sbyte custom2;
-
-        public override int Serialize(byte[] bytes, ref int offset)
-            {
-                return MavLinkSerializer.Serialize_HIGH_LATENCY2(this, bytes, ref offset);
             }        
 	}
 

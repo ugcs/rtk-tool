@@ -9,10 +9,19 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using MissionPlanner.Utilities;
 using static MAVLink;
 
 namespace ClientRtkGps
 {
+
+    enum MavMsgsPackedType
+    {
+        GPS_RTCM_DATA,
+        GPS_INJECT_DATA,
+        DATA96
+    }
+
     class RtkTransmitter
     {
         private object serialLocker = new object();
@@ -182,7 +191,7 @@ namespace ClientRtkGps
             {
                 DisableTcpClientSink();
 
-                tcpClientSink = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Tcp);
+                tcpClientSink = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 //var uri = new Uri(url);
                 //udpSink.Connect(uri.Host, uri.Port);
                 tcpClientSink.Connect(host, port);
@@ -498,9 +507,9 @@ namespace ClientRtkGps
         }
         */
 
-        public void Send(byte[] data, byte length, bool rtcm)
+        public void Send(byte[] data, int length, MavMsgsPackedType mavType)
         {
-            if (rtcm) {
+            if (mavType == MavMsgsPackedType.GPS_RTCM_DATA) {
 
                 Msg_gps_rtcm_data message = new Msg_gps_rtcm_data();
                 const byte RTCM_MSGLEN = 180;
@@ -537,7 +546,7 @@ namespace ClientRtkGps
 
                 rtcmSequenceNumber++;
             }
-            else
+            else if (mavType == MavMsgsPackedType.GPS_INJECT_DATA)
             {
                 Msg_gps_inject_data message = new Msg_gps_inject_data();
                 const byte GPS_MSGLEN = 110;
@@ -557,6 +566,47 @@ namespace ClientRtkGps
 
                     Transmit(message);
                 }
+            } else if (mavType == MavMsgsPackedType.DATA96)
+            {
+                Msg_data96 message = new Msg_data96();
+                const byte DATA96_MSGLEN = 90;
+
+                // get station id
+                uint stationId = rtcm3.getbitu(data, 36, 12); 
+
+                // number of packets we need, including a termination packet if needed
+                var nopackets = (length % DATA96_MSGLEN) == 0 ? length / DATA96_MSGLEN: (length / DATA96_MSGLEN) + 1;
+
+                for (int a = 0; a < nopackets; a++)
+                {
+                    message.type = 34;
+                    message.len = 96;
+
+                    // calc how much data we are copying
+                    var copy = (byte)Math.Min(length - a * DATA96_MSGLEN, DATA96_MSGLEN);
+                    message.len = copy;
+
+                    message.data = new byte[DATA96_MSGLEN + 6];
+                    // copy the data
+                    Array.Copy(data, a * DATA96_MSGLEN, message.data, 6, copy);
+
+                    // add rtcm station id (first three bytes)
+                    rtcm3.setbitu(message.data, 0, 24, stationId);
+
+                    // add rtcm seq (fourth byte)
+                    rtcm3.setbitu(message.data, 24, 8, ((uint)rtcmSequenceNumber & 0xff));
+
+                    // add current chucnk number (fifth byte)
+                    rtcm3.setbitu(message.data, 32, 8, ((uint)a & 0xff));
+
+                    // add chuncks count (six byte)
+                    rtcm3.setbitu(message.data, 40, 8, ((uint)nopackets & 0xff));
+
+                    Transmit(message);
+                }
+
+                rtcmSequenceNumber++;
+
             }
         }
     }

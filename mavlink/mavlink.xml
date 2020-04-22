@@ -269,6 +269,16 @@
             Camera
             </summary>
         </member>
+        <member name="F:MavLink.MAV_TYPE.MAV_TYPE_CHARGING_STATION">
+            <summary>
+            Charging station
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_TYPE.MAV_TYPE_FLARM">
+            <summary>
+            Onboard FLARM collision avoidance system
+            </summary>
+        </member>
         <member name="T:MavLink.FIRMWARE_VERSION_TYPE">
             <summary>
             These values define the type of firmware release.  These values indicate the first version or release of this type.  For example the first alpha release would be 64, the second would be 65.
@@ -297,81 +307,6 @@
         <member name="F:MavLink.FIRMWARE_VERSION_TYPE.FIRMWARE_VERSION_TYPE_OFFICIAL">
             <summary>
             official stable release
-            </summary>
-        </member>
-        <member name="T:MavLink.HL_FAILURE_FLAG">
-            <summary>
-            Flags to report failure cases over the high latency telemtry.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_GPS">
-            <summary>
-            GPS failure.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_DIFFERENTIAL_PRESSURE">
-            <summary>
-            Differential pressure sensor failure.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_ABSOLUTE_PRESSURE">
-            <summary>
-            Absolute pressure sensor failure.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_3D_ACCEL">
-            <summary>
-            Accelerometer sensor failure.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_3D_GYRO">
-            <summary>
-            Gyroscope sensor failure.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_3D_MAG">
-            <summary>
-            Magnetometer sensor failure.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_TERRAIN">
-            <summary>
-            Terrain subsystem failure.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_BATTERY">
-            <summary>
-            Battery failure/critical low battery.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_RC_RECEIVER">
-            <summary>
-            RC receiver failure/no rc connection.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_OFFBOARD_LINK">
-            <summary>
-            Offboard link failure.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_ENGINE">
-            <summary>
-            Engine failure.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_GEOFENCE">
-            <summary>
-            Geofence violation.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_ESTIMATOR">
-            <summary>
-            Estimator failure, for example measurement rejection or large variances.
-            </summary>
-        </member>
-        <member name="F:MavLink.HL_FAILURE_FLAG.HL_FAILURE_FLAG_MISSION">
-            <summary>
-            Mission failure.
             </summary>
         </member>
         <member name="T:MavLink.MAV_MODE_FLAG">
@@ -750,6 +685,11 @@
             0x2000000 Battery
             </summary>
         </member>
+        <member name="F:MavLink.MAV_SYS_STATUS_SENSOR.MAV_SYS_STATUS_SENSOR_PROXIMITY">
+            <summary>
+            0x4000000 Proximity
+            </summary>
+        </member>
         <member name="T:MavLink.MAV_FRAME">
             <summary>
             
@@ -757,12 +697,12 @@
         </member>
         <member name="F:MavLink.MAV_FRAME.MAV_FRAME_GLOBAL">
             <summary>
-            Global coordinate frame, WGS84 coordinate system. First value / x: latitude, second value / y: longitude, third value / z: positive altitude over mean sea level (MSL)
+            Global coordinate frame, WGS84 coordinate system. First value / x: latitude, second value / y: longitude, third value / z: positive altitude over mean sea level (MSL).
             </summary>
         </member>
         <member name="F:MavLink.MAV_FRAME.MAV_FRAME_LOCAL_NED">
             <summary>
-            Local coordinate frame, Z-up (x: north, y: east, z: down).
+            Local coordinate frame, Z-down (x: north, y: east, z: down).
             </summary>
         </member>
         <member name="F:MavLink.MAV_FRAME.MAV_FRAME_MISSION">
@@ -777,12 +717,12 @@
         </member>
         <member name="F:MavLink.MAV_FRAME.MAV_FRAME_LOCAL_ENU">
             <summary>
-            Local coordinate frame, Z-down (x: east, y: north, z: up)
+            Local coordinate frame, Z-up (x: east, y: north, z: up).
             </summary>
         </member>
         <member name="F:MavLink.MAV_FRAME.MAV_FRAME_GLOBAL_INT">
             <summary>
-            Global coordinate frame, WGS84 coordinate system. First value / x: latitude in degrees*1.0e-7, second value / y: longitude in degrees*1.0e-7, third value / z: positive altitude over mean sea level (MSL)
+            Global coordinate frame, WGS84 coordinate system. First value / x: latitude in degrees*1.0e-7, second value / y: longitude in degrees*1.0e-7, third value / z: positive altitude over mean sea level (MSL).
             </summary>
         </member>
         <member name="F:MavLink.MAV_FRAME.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT">
@@ -813,6 +753,46 @@
         <member name="F:MavLink.MAV_FRAME.MAV_FRAME_GLOBAL_TERRAIN_ALT_INT">
             <summary>
             Global coordinate frame with above terrain level altitude. WGS84 coordinate system, relative altitude over terrain with respect to the waypoint coordinate. First value / x: latitude in degrees*10e-7, second value / y: longitude in degrees*10e-7, third value / z: positive altitude in meters with 0 being at ground level in terrain model.
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_FRAME.MAV_FRAME_BODY_FRD">
+            <summary>
+            Body fixed frame of reference, Z-down (x: forward, y: right, z: down).
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_FRAME.MAV_FRAME_BODY_FLU">
+            <summary>
+            Body fixed frame of reference, Z-up (x: forward, y: left, z: up).
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_FRAME.MAV_FRAME_MOCAP_NED">
+            <summary>
+            Odometry local coordinate frame of data given by a motion capture system, Z-down (x: north, y: east, z: down).
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_FRAME.MAV_FRAME_MOCAP_ENU">
+            <summary>
+            Odometry local coordinate frame of data given by a motion capture system, Z-up (x: east, y: north, z: up).
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_FRAME.MAV_FRAME_VISION_NED">
+            <summary>
+            Odometry local coordinate frame of data given by a vision estimation system, Z-down (x: north, y: east, z: down).
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_FRAME.MAV_FRAME_VISION_ENU">
+            <summary>
+            Odometry local coordinate frame of data given by a vision estimation system, Z-up (x: east, y: north, z: up).
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_FRAME.MAV_FRAME_ESTIM_NED">
+            <summary>
+            Odometry local coordinate frame of data given by an estimator running onboard the vehicle, Z-down (x: north, y: east, z: down).
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_FRAME.MAV_FRAME_ESTIM_ENU">
+            <summary>
+            Odometry local coordinate frame of data given by an estimator running onboard the vehicle, Z-up (x: east, y: noth, z: up).
             </summary>
         </member>
         <member name="T:MavLink.MAVLINK_DATA_STREAM_TYPE">
@@ -1217,12 +1197,12 @@
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_DO_DIGICAM_CONFIGURE">
             <summary>
-            THIS INTERFACE IS DEPRECATED since 2018-01. Please use PARAM_EXT_XXX messages and the camera definition format described in https://mavlink.io/en/protocol/camera_def.html.
+            Mission command to configure an on-board camera controller system.
             </summary>
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_DO_DIGICAM_CONTROL">
             <summary>
-            THIS INTERFACE IS DEPRECATED since 2018-01. Please use PARAM_EXT_XXX messages and the camera definition format described in https://mavlink.io/en/protocol/camera_def.html.
+            Mission command to control an on-board camera controller system.
             </summary>
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_DO_MOUNT_CONFIGURE">
@@ -1355,11 +1335,6 @@
             Request the interval between messages for a particular MAVLink message ID. This interface replaces REQUEST_DATA_STREAM
             </summary>
         </member>
-        <member name="F:MavLink.MAV_CMD.MAV_CMD_REQUEST_PROTOCOL_VERSION">
-            <summary>
-            Request MAVLink protocol version compatibility
-            </summary>
-        </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_REQUEST_AUTOPILOT_CAPABILITIES">
             <summary>
             Request autopilot capabilities
@@ -1367,37 +1342,42 @@
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_REQUEST_CAMERA_INFORMATION">
             <summary>
-            Request camera information (CAMERA_INFORMATION).
+            WIP: Request camera information (CAMERA_INFORMATION)
             </summary>
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_REQUEST_CAMERA_SETTINGS">
             <summary>
-            Request camera settings (CAMERA_SETTINGS).
+            WIP: Request camera settings (CAMERA_SETTINGS)
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_CMD.MAV_CMD_SET_CAMERA_SETTINGS_1">
+            <summary>
+            WIP: Set the camera settings part 1 (CAMERA_SETTINGS)
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_CMD.MAV_CMD_SET_CAMERA_SETTINGS_2">
+            <summary>
+            WIP: Set the camera settings part 2 (CAMERA_SETTINGS)
             </summary>
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_REQUEST_STORAGE_INFORMATION">
             <summary>
-            WIP: Request storage information (STORAGE_INFORMATION). Use the command's target_component to target a specific component's storage.
+            WIP: Request storage information (STORAGE_INFORMATION)
             </summary>
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_STORAGE_FORMAT">
             <summary>
-            WIP: Format a storage medium. Once format is complete, a STORAGE_INFORMATION message is sent. Use the command's target_component to target a specific component's storage.
+            WIP: Format a storage medium
             </summary>
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_REQUEST_CAMERA_CAPTURE_STATUS">
             <summary>
-            Request camera capture status (CAMERA_CAPTURE_STATUS)
+            WIP: Request camera capture status (CAMERA_CAPTURE_STATUS)
             </summary>
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_REQUEST_FLIGHT_INFORMATION">
             <summary>
             WIP: Request flight information (FLIGHT_INFORMATION)
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_CMD.MAV_CMD_RESET_CAMERA_SETTINGS">
-            <summary>
-            Reset all camera settings to Factory Default
             </summary>
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_SET_CAMERA_MODE">
@@ -1412,12 +1392,7 @@
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_IMAGE_STOP_CAPTURE">
             <summary>
-            Stop image capture sequence Use NAN for reserved values.
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_CMD.MAV_CMD_REQUEST_CAMERA_IMAGE_CAPTURE">
-            <summary>
-            WIP: Re-request a CAMERA_IMAGE_CAPTURE packet. Use NAN for reserved values.
+            Stop image capture sequence
             </summary>
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_DO_TRIGGER_CONTROL">
@@ -1427,27 +1402,12 @@
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_VIDEO_START_CAPTURE">
             <summary>
-            Starts video capture (recording). Use NAN for reserved values.
+            Starts video capture (recording)
             </summary>
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_VIDEO_STOP_CAPTURE">
             <summary>
-            Stop the current video capture (recording). Use NAN for reserved values.
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_CMD.MAV_CMD_VIDEO_START_STREAMING">
-            <summary>
-            WIP: Start video streaming
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_CMD.MAV_CMD_VIDEO_STOP_STREAMING">
-            <summary>
-            WIP: Stop the current video streaming
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_CMD.MAV_CMD_REQUEST_VIDEO_STREAM_INFORMATION">
-            <summary>
-            WIP: Request video stream information (VIDEO_STREAM_INFORMATION)
+            Stop the current video capture (recording)
             </summary>
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_LOGGING_START">
@@ -1491,11 +1451,6 @@
             <summary>
             This command sets submode circle when vehicle is in guided mode. Vehicle flies along a circle facing the center of the circle. The user can input the velocity along the circle and change the radius. If no input is given the vehicle will hold position.
                              
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_CMD.MAV_CMD_CONDITION_GATE">
-            <summary>
-            WIP: Delay mission state machine until gate has been reached.
             </summary>
         </member>
         <member name="F:MavLink.MAV_CMD.MAV_CMD_NAV_FENCE_RETURN_POINT">
@@ -1690,7 +1645,7 @@
         </member>
         <member name="F:MavLink.MAV_ROI.MAV_ROI_WPNEXT">
             <summary>
-            Point toward next waypoint, with optional pitch/roll/yaw offset.
+            Point toward next waypoint.
             </summary>
         </member>
         <member name="F:MavLink.MAV_ROI.MAV_ROI_WPINDEX">
@@ -1813,66 +1768,6 @@
             64-bit floating-point
             </summary>
         </member>
-        <member name="T:MavLink.MAV_PARAM_EXT_TYPE">
-            <summary>
-            Specifies the datatype of a MAVLink extended parameter.
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_PARAM_EXT_TYPE.MAV_PARAM_EXT_TYPE_UINT8">
-            <summary>
-            8-bit unsigned integer
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_PARAM_EXT_TYPE.MAV_PARAM_EXT_TYPE_INT8">
-            <summary>
-            8-bit signed integer
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_PARAM_EXT_TYPE.MAV_PARAM_EXT_TYPE_UINT16">
-            <summary>
-            16-bit unsigned integer
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_PARAM_EXT_TYPE.MAV_PARAM_EXT_TYPE_INT16">
-            <summary>
-            16-bit signed integer
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_PARAM_EXT_TYPE.MAV_PARAM_EXT_TYPE_UINT32">
-            <summary>
-            32-bit unsigned integer
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_PARAM_EXT_TYPE.MAV_PARAM_EXT_TYPE_INT32">
-            <summary>
-            32-bit signed integer
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_PARAM_EXT_TYPE.MAV_PARAM_EXT_TYPE_UINT64">
-            <summary>
-            64-bit unsigned integer
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_PARAM_EXT_TYPE.MAV_PARAM_EXT_TYPE_INT64">
-            <summary>
-            64-bit signed integer
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_PARAM_EXT_TYPE.MAV_PARAM_EXT_TYPE_REAL32">
-            <summary>
-            32-bit floating-point
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_PARAM_EXT_TYPE.MAV_PARAM_EXT_TYPE_REAL64">
-            <summary>
-            64-bit floating-point
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_PARAM_EXT_TYPE.MAV_PARAM_EXT_TYPE_CUSTOM">
-            <summary>
-            Custom Type
-            </summary>
-        </member>
         <member name="T:MavLink.MAV_RESULT">
             <summary>
             result from a mavlink command
@@ -1901,11 +1796,6 @@
         <member name="F:MavLink.MAV_RESULT.MAV_RESULT_FAILED">
             <summary>
             Command executed, but failed
-            </summary>
-        </member>
-        <member name="F:MavLink.MAV_RESULT.MAV_RESULT_IN_PROGRESS">
-            <summary>
-            WIP: Command being executed
             </summary>
         </member>
         <member name="T:MavLink.MAV_MISSION_RESULT">
@@ -2563,6 +2453,46 @@
             Payload battery
             </summary>
         </member>
+        <member name="T:MavLink.MAV_BATTERY_CHARGE_STATE">
+            <summary>
+            Enumeration for low battery states.
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_BATTERY_CHARGE_STATE.MAV_BATTERY_CHARGE_STATE_UNDEFINED">
+            <summary>
+            Low battery state is not provided
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_BATTERY_CHARGE_STATE.MAV_BATTERY_CHARGE_STATE_OK">
+            <summary>
+            Battery is not in low state. Normal operation.
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_BATTERY_CHARGE_STATE.MAV_BATTERY_CHARGE_STATE_LOW">
+            <summary>
+            Battery state is low, warn and monitor close.
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_BATTERY_CHARGE_STATE.MAV_BATTERY_CHARGE_STATE_CRITICAL">
+            <summary>
+            Battery state is critical, return or abort immediately.
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_BATTERY_CHARGE_STATE.MAV_BATTERY_CHARGE_STATE_EMERGENCY">
+            <summary>
+            Battery state is too low for ordinary abort sequence. Perform fastest possible emergency stop to prevent damage.
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_BATTERY_CHARGE_STATE.MAV_BATTERY_CHARGE_STATE_FAILED">
+            <summary>
+            Battery failed, damage unavoidable.
+            </summary>
+        </member>
+        <member name="F:MavLink.MAV_BATTERY_CHARGE_STATE.MAV_BATTERY_CHARGE_STATE_UNHEALTHY">
+            <summary>
+            Battery is diagnosed to be defective or an error occurred, usage is discouraged / prohibited.
+            </summary>
+        </member>
         <member name="T:MavLink.MAV_VTOL_STATE">
             <summary>
             Enumeration of VTOL states
@@ -2938,6 +2868,21 @@
             PPP, 3D position.
             </summary>
         </member>
+        <member name="T:MavLink.RTK_BASELINE_COORDINATE_SYSTEM">
+            <summary>
+            RTK GPS baseline coordinate system, used for RTK corrections
+            </summary>
+        </member>
+        <member name="F:MavLink.RTK_BASELINE_COORDINATE_SYSTEM.RTK_BASELINE_COORDINATE_SYSTEM_ECEF">
+            <summary>
+            Earth-centered, Earth-fixed
+            </summary>
+        </member>
+        <member name="F:MavLink.RTK_BASELINE_COORDINATE_SYSTEM.RTK_BASELINE_COORDINATE_SYSTEM_NED">
+            <summary>
+            North, East, Down
+            </summary>
+        </member>
         <member name="T:MavLink.LANDING_TARGET_TYPE">
             <summary>
             Type of landing target
@@ -2991,66 +2936,6 @@
         <member name="F:MavLink.VTOL_TRANSITION_HEADING.VTOL_TRANSITION_HEADING_ANY">
             <summary>
             Use the current heading when reaching takeoff altitude (potentially facing the wind when weather-vaning is active).
-            </summary>
-        </member>
-        <member name="T:MavLink.CAMERA_CAP_FLAGS">
-            <summary>
-            Camera capability flags (Bitmap).
-            </summary>
-        </member>
-        <member name="F:MavLink.CAMERA_CAP_FLAGS.CAMERA_CAP_FLAGS_CAPTURE_VIDEO">
-            <summary>
-            Camera is able to record video.
-            </summary>
-        </member>
-        <member name="F:MavLink.CAMERA_CAP_FLAGS.CAMERA_CAP_FLAGS_CAPTURE_IMAGE">
-            <summary>
-            Camera is able to capture images.
-            </summary>
-        </member>
-        <member name="F:MavLink.CAMERA_CAP_FLAGS.CAMERA_CAP_FLAGS_HAS_MODES">
-            <summary>
-            Camera has separate Video and Image/Photo modes (MAV_CMD_SET_CAMERA_MODE)
-            </summary>
-        </member>
-        <member name="F:MavLink.CAMERA_CAP_FLAGS.CAMERA_CAP_FLAGS_CAN_CAPTURE_IMAGE_IN_VIDEO_MODE">
-            <summary>
-            Camera can capture images while in video mode
-            </summary>
-        </member>
-        <member name="F:MavLink.CAMERA_CAP_FLAGS.CAMERA_CAP_FLAGS_CAN_CAPTURE_VIDEO_IN_IMAGE_MODE">
-            <summary>
-            Camera can capture videos while in Photo/Image mode
-            </summary>
-        </member>
-        <member name="F:MavLink.CAMERA_CAP_FLAGS.CAMERA_CAP_FLAGS_HAS_IMAGE_SURVEY_MODE">
-            <summary>
-            Camera has image survey mode (MAV_CMD_SET_CAMERA_MODE)
-            </summary>
-        </member>
-        <member name="T:MavLink.PARAM_ACK">
-            <summary>
-            Result from a PARAM_EXT_SET message.
-            </summary>
-        </member>
-        <member name="F:MavLink.PARAM_ACK.PARAM_ACK_ACCEPTED">
-            <summary>
-            Parameter value ACCEPTED and SET
-            </summary>
-        </member>
-        <member name="F:MavLink.PARAM_ACK.PARAM_ACK_VALUE_UNSUPPORTED">
-            <summary>
-            Parameter value UNKNOWN/UNSUPPORTED
-            </summary>
-        </member>
-        <member name="F:MavLink.PARAM_ACK.PARAM_ACK_FAILED">
-            <summary>
-            Parameter failed to set
-            </summary>
-        </member>
-        <member name="F:MavLink.PARAM_ACK.PARAM_ACK_IN_PROGRESS">
-            <summary>
-            Parameter value received but not yet validated or set. A subsequent PARAM_EXT_ACK will follow once operation is completed with the actual result. These are for parameters that may take longer to set. Instead of waiting for an ACK and potentially timing out, you will immediately receive this response to let you know it was received.
             </summary>
         </member>
         <member name="T:MavLink.CAMERA_MODE">
@@ -3108,19 +2993,19 @@
             Weather is not good to fly
             </summary>
         </member>
-        <member name="T:MavLink.RTK_BASELINE_COORDINATE_SYSTEM">
+        <member name="T:MavLink.RC_TYPE">
             <summary>
-            RTK GPS baseline coordinate system, used for RTK corrections
+            RC type
             </summary>
         </member>
-        <member name="F:MavLink.RTK_BASELINE_COORDINATE_SYSTEM.RTK_BASELINE_COORDINATE_SYSTEM_ECEF">
+        <member name="F:MavLink.RC_TYPE.RC_TYPE_SPEKTRUM_DSM2">
             <summary>
-            Earth-centered, Earth-fixed
+            Spektrum DSM2
             </summary>
         </member>
-        <member name="F:MavLink.RTK_BASELINE_COORDINATE_SYSTEM.RTK_BASELINE_COORDINATE_SYSTEM_NED">
+        <member name="F:MavLink.RC_TYPE.RC_TYPE_SPEKTRUM_DSMX">
             <summary>
-            North, East, Down
+            Spektrum DSMX
             </summary>
         </member>
         <member name="T:MavLink.Msg_heartbeat">
@@ -3140,17 +3025,17 @@
         </member>
         <member name="F:MavLink.Msg_heartbeat.base_mode">
             <summary>
-            System mode bitfield, see MAV_MODE_FLAG ENUM in mavlink/include/mavlink_types.h
+            System mode bitfield, as defined by MAV_MODE_FLAG enum
             </summary>
         </member>
         <member name="F:MavLink.Msg_heartbeat.custom_mode">
             <summary>
-            A bitfield for use for autopilot-specific flags.
+            A bitfield for use for autopilot-specific flags
             </summary>
         </member>
         <member name="F:MavLink.Msg_heartbeat.system_status">
             <summary>
-            System status flag, see MAV_STATE ENUM
+            System status flag, as defined by MAV_STATE enum
             </summary>
         </member>
         <member name="F:MavLink.Msg_heartbeat.mavlink_version">
@@ -3441,7 +3326,7 @@
         <member name="T:MavLink.Msg_gps_raw_int">
             <summary>
             The global position, as returned by the Global Positioning System (GPS). This is
-                           NOT the global position estimate of the system, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate. Coordinate frame is right-handed, Z-axis up (GPS frame).
+                           NOT the global position estimate of the system, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate.
             </summary>
         </member>
         <member name="F:MavLink.Msg_gps_raw_int.time_usec">
@@ -4118,12 +4003,12 @@
         </member>
         <member name="F:MavLink.Msg_mission_item.frame">
             <summary>
-            The coordinate system of the waypoint. see MAV_FRAME in mavlink_types.h
+            The coordinate system of the waypoint, as defined by MAV_FRAME enum
             </summary>
         </member>
         <member name="F:MavLink.Msg_mission_item.command">
             <summary>
-            The scheduled action for the waypoint. see MAV_CMD in common.xml MAVLink specs
+            The scheduled action for the waypoint, as defined by MAV_CMD enum
             </summary>
         </member>
         <member name="F:MavLink.Msg_mission_item.current">
@@ -4433,7 +4318,7 @@
         </member>
         <member name="F:MavLink.Msg_safety_set_allowed_area.frame">
             <summary>
-            Coordinate frame, as defined by MAV_FRAME enum in mavlink_types.h. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
+            Coordinate frame, as defined by MAV_FRAME enum. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
             </summary>
         </member>
         <member name="F:MavLink.Msg_safety_set_allowed_area.p1x">
@@ -4473,7 +4358,7 @@
         </member>
         <member name="F:MavLink.Msg_safety_allowed_area.frame">
             <summary>
-            Coordinate frame, as defined by MAV_FRAME enum in mavlink_types.h. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
+            Coordinate frame, as defined by MAV_FRAME enum. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
             </summary>
         </member>
         <member name="F:MavLink.Msg_safety_allowed_area.p1x">
@@ -4979,12 +4864,12 @@
         </member>
         <member name="F:MavLink.Msg_mission_item_int.frame">
             <summary>
-            The coordinate system of the waypoint. see MAV_FRAME in mavlink_types.h
+            The coordinate system of the waypoint, as defined by MAV_FRAME enum
             </summary>
         </member>
         <member name="F:MavLink.Msg_mission_item_int.command">
             <summary>
-            The scheduled action for the waypoint. see MAV_CMD in common.xml MAVLink specs
+            The scheduled action for the waypoint, as defined by MAV_CMD enum
             </summary>
         </member>
         <member name="F:MavLink.Msg_mission_item_int.current">
@@ -5084,12 +4969,12 @@
         </member>
         <member name="F:MavLink.Msg_command_int.frame">
             <summary>
-            The coordinate system of the COMMAND. see MAV_FRAME in mavlink_types.h
+            The coordinate system of the COMMAND, as defined by MAV_FRAME enum
             </summary>
         </member>
         <member name="F:MavLink.Msg_command_int.command">
             <summary>
-            The scheduled action for the mission item. see MAV_CMD in common.xml MAVLink specs
+            The scheduled action for the mission item, as defined by MAV_CMD enum
             </summary>
         </member>
         <member name="F:MavLink.Msg_command_int.current">
@@ -6535,7 +6420,7 @@
         <member name="T:MavLink.Msg_hil_gps">
             <summary>
             The global position, as returned by the Global Positioning System (GPS). This is
-                            NOT the global position estimate of the sytem, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate. Coordinate frame is right-handed, Z-axis up (GPS frame).
+                            NOT the global position estimate of the sytem, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate.
             </summary>
         </member>
         <member name="F:MavLink.Msg_hil_gps.time_usec">
@@ -6975,7 +6860,7 @@
         </member>
         <member name="T:MavLink.Msg_gps2_raw">
             <summary>
-            Second GPS data. Coordinate frame is right-handed, Z-axis up (GPS frame).
+            Second GPS data.
             </summary>
         </member>
         <member name="F:MavLink.Msg_gps2_raw.time_usec">
@@ -7988,6 +7873,26 @@
             Size in radians of target along y-axis
             </summary>
         </member>
+        <member name="T:MavLink.Msg_data96">
+            <summary>
+            Data packet, size 96
+            </summary>
+        </member>
+        <member name="F:MavLink.Msg_data96.type">
+            <summary>
+            data type
+            </summary>
+        </member>
+        <member name="F:MavLink.Msg_data96.len">
+            <summary>
+            data length
+            </summary>
+        </member>
+        <member name="F:MavLink.Msg_data96.data">
+            <summary>
+            raw data
+            </summary>
+        </member>
         <member name="T:MavLink.Msg_estimator_status">
             <summary>
             Estimator status message including flags, innovation test ratios and estimated accuracies. The flags message is an integer bitmask containing information on which EKF outputs are valid. See the ESTIMATOR_STATUS_FLAGS enum definition for further information. The innovaton test ratios show the magnitude of the sensor innovation divided by the innovation check threshold. Under normal operation the innovaton test ratios should be below 0.5 with occasional values up to 1.0. Values greater than 1.0 should be rare under normal operation and indicate that a measurement has been rejected by the filter. The user should be notified if an innovation test ratio greater than 1.0 is recorded. Notifications for values in the range between 0.5 and 1.0 should be optional and controllable by the user.
@@ -8210,7 +8115,7 @@
         </member>
         <member name="F:MavLink.Msg_high_latency.base_mode">
             <summary>
-            System mode bitfield, see MAV_MODE_FLAG ENUM in mavlink/include/mavlink_types.h
+            System mode bitfield, as defined by MAV_MODE_FLAG enum.
             </summary>
         </member>
         <member name="F:MavLink.Msg_high_latency.custom_mode">
@@ -8326,146 +8231,6 @@
         <member name="F:MavLink.Msg_high_latency.wp_distance">
             <summary>
             distance to target (meters)
-            </summary>
-        </member>
-        <member name="T:MavLink.Msg_high_latency2">
-            <summary>
-            WIP: Message appropriate for high latency connections like Iridium (version 2)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.timestamp">
-            <summary>
-            Timestamp (milliseconds since boot or Unix epoch)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.type">
-            <summary>
-            Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.autopilot">
-            <summary>
-            Autopilot type / class. defined in MAV_AUTOPILOT ENUM
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.custom_mode">
-            <summary>
-            A bitfield for use for autopilot-specific flags (2 byte version).
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.latitude">
-            <summary>
-            Latitude, expressed as degrees * 1E7
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.longitude">
-            <summary>
-            Longitude, expressed as degrees * 1E7
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.altitude">
-            <summary>
-            Altitude above mean sea level
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.target_altitude">
-            <summary>
-            Altitude setpoint
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.heading">
-            <summary>
-            Heading (degrees / 2)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.target_heading">
-            <summary>
-            Heading setpoint (degrees / 2)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.target_distance">
-            <summary>
-            Distance to target waypoint or position (meters / 10)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.throttle">
-            <summary>
-            Throttle (percentage)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.airspeed">
-            <summary>
-            Airspeed (m/s * 5)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.airspeed_sp">
-            <summary>
-            Airspeed setpoint (m/s * 5)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.groundspeed">
-            <summary>
-            Groundspeed (m/s * 5)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.windspeed">
-            <summary>
-            Windspeed (m/s * 5)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.wind_heading">
-            <summary>
-            Wind heading (deg / 2)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.eph">
-            <summary>
-            Maximum error horizontal position since last message (m * 10)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.epv">
-            <summary>
-            Maximum error vertical position since last message (m * 10)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.temperature_air">
-            <summary>
-            Air temperature (degrees C) from airspeed sensor
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.climb_rate">
-            <summary>
-            Maximum climb rate magnitude since last message (m/s * 10)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.battery">
-            <summary>
-            Battery (percentage, -1 for DNU)
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.wp_num">
-            <summary>
-            Current waypoint number
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.failure_flags">
-            <summary>
-            Indicates failures as defined in HL_FAILURE_FLAG ENUM. 
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.custom0">
-            <summary>
-            Field for custom payload.
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.custom1">
-            <summary>
-            Field for custom payload.
-            </summary>
-        </member>
-        <member name="F:MavLink.Msg_high_latency2.custom2">
-            <summary>
-            Field for custom payload.
             </summary>
         </member>
         <member name="T:MavLink.Msg_vibration">

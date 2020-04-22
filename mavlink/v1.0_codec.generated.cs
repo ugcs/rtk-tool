@@ -166,12 +166,12 @@ namespace MavLink
 			{147, new MavPacketInfo(Deserialize_BATTERY_STATUS, 154)},
 			{148, new MavPacketInfo(Deserialize_AUTOPILOT_VERSION, 178)},
 			{149, new MavPacketInfo(Deserialize_LANDING_TARGET, 200)},
+			{172, new MavPacketInfo(Deserialize_DATA96, 22)},
 			{230, new MavPacketInfo(Deserialize_ESTIMATOR_STATUS, 163)},
 			{231, new MavPacketInfo(Deserialize_WIND_COV, 105)},
 			{232, new MavPacketInfo(Deserialize_GPS_INPUT, 151)},
 			{233, new MavPacketInfo(Deserialize_GPS_RTCM_DATA, 35)},
 			{234, new MavPacketInfo(Deserialize_HIGH_LATENCY, 150)},
-			{235, new MavPacketInfo(Deserialize_HIGH_LATENCY2, 179)},
 			{241, new MavPacketInfo(Deserialize_VIBRATION, 90)},
 			{242, new MavPacketInfo(Deserialize_HOME_POSITION, 104)},
 			{243, new MavPacketInfo(Deserialize_SET_HOME_POSITION, 85)},
@@ -1873,6 +1873,16 @@ namespace MavLink
 			};
 		}
 
+		internal static MavlinkMessage Deserialize_DATA96(byte[] bytes, int offset)
+		{
+			return new Msg_data96
+			{
+				type = bytes[offset + 0],
+				len = bytes[offset + 1],
+				data =  ByteArrayUtil.ToUInt8(bytes, offset + 2, 96),
+			};
+		}
+
 		internal static MavlinkMessage Deserialize_ESTIMATOR_STATUS(byte[] bytes, int offset)
 		{
 			return new Msg_estimator_status
@@ -1969,40 +1979,6 @@ namespace MavLink
 				temperature_air = bitconverter.ToInt8(bytes, offset + 37),
 				failsafe = bytes[offset + 38],
 				wp_num = bytes[offset + 39],
-			};
-		}
-
-		internal static MavlinkMessage Deserialize_HIGH_LATENCY2(byte[] bytes, int offset)
-		{
-			return new Msg_high_latency2
-			{
-				timestamp = bitconverter.ToUInt32(bytes, offset + 0),
-				latitude = bitconverter.ToInt32(bytes, offset + 4),
-				longitude = bitconverter.ToInt32(bytes, offset + 8),
-				custom_mode = bitconverter.ToUInt16(bytes, offset + 12),
-				altitude = bitconverter.ToInt16(bytes, offset + 14),
-				target_altitude = bitconverter.ToInt16(bytes, offset + 16),
-				target_distance = bitconverter.ToUInt16(bytes, offset + 18),
-				wp_num = bitconverter.ToUInt16(bytes, offset + 20),
-				failure_flags = bitconverter.ToUInt16(bytes, offset + 22),
-				type = bytes[offset + 24],
-				autopilot = bytes[offset + 25],
-				heading = bytes[offset + 26],
-				target_heading = bytes[offset + 27],
-				throttle = bytes[offset + 28],
-				airspeed = bytes[offset + 29],
-				airspeed_sp = bytes[offset + 30],
-				groundspeed = bytes[offset + 31],
-				windspeed = bytes[offset + 32],
-				wind_heading = bytes[offset + 33],
-				eph = bytes[offset + 34],
-				epv = bytes[offset + 35],
-				temperature_air = bitconverter.ToInt8(bytes, offset + 36),
-				climb_rate = bitconverter.ToInt8(bytes, offset + 37),
-				battery = bitconverter.ToInt8(bytes, offset + 38),
-				custom0 = bitconverter.ToInt8(bytes, offset + 39),
-				custom1 = bitconverter.ToInt8(bytes, offset + 40),
-				custom2 = bitconverter.ToInt8(bytes, offset + 41),
 			};
 		}
 
@@ -3749,6 +3725,15 @@ namespace MavLink
 			return 149;
 		}
 
+		internal static int Serialize_DATA96(this Msg_data96 msg, byte[] bytes, ref int offset)
+		{
+			bytes[offset + 0] = msg.type;
+			bytes[offset + 1] = msg.len;
+			ByteArrayUtil.ToByteArray(msg.data, bytes, offset + 2, 96);
+			offset += 98;
+			return 172;
+		}
+
 		internal static int Serialize_ESTIMATOR_STATUS(this Msg_estimator_status msg, byte[] bytes, ref int offset)
 		{
 			bitconverter.GetBytes(msg.time_usec, bytes, offset + 0);
@@ -3841,39 +3826,6 @@ namespace MavLink
 			bytes[offset + 39] = msg.wp_num;
 			offset += 40;
 			return 234;
-		}
-
-		internal static int Serialize_HIGH_LATENCY2(this Msg_high_latency2 msg, byte[] bytes, ref int offset)
-		{
-			bitconverter.GetBytes(msg.timestamp, bytes, offset + 0);
-			bitconverter.GetBytes(msg.latitude, bytes, offset + 4);
-			bitconverter.GetBytes(msg.longitude, bytes, offset + 8);
-			bitconverter.GetBytes(msg.custom_mode, bytes, offset + 12);
-			bitconverter.GetBytes(msg.altitude, bytes, offset + 14);
-			bitconverter.GetBytes(msg.target_altitude, bytes, offset + 16);
-			bitconverter.GetBytes(msg.target_distance, bytes, offset + 18);
-			bitconverter.GetBytes(msg.wp_num, bytes, offset + 20);
-			bitconverter.GetBytes(msg.failure_flags, bytes, offset + 22);
-			bytes[offset + 24] = msg.type;
-			bytes[offset + 25] = msg.autopilot;
-			bytes[offset + 26] = msg.heading;
-			bytes[offset + 27] = msg.target_heading;
-			bytes[offset + 28] = msg.throttle;
-			bytes[offset + 29] = msg.airspeed;
-			bytes[offset + 30] = msg.airspeed_sp;
-			bytes[offset + 31] = msg.groundspeed;
-			bytes[offset + 32] = msg.windspeed;
-			bytes[offset + 33] = msg.wind_heading;
-			bytes[offset + 34] = msg.eph;
-			bytes[offset + 35] = msg.epv;
-			bytes[offset + 36] = unchecked((byte)msg.temperature_air);
-			bytes[offset + 37] = unchecked((byte)msg.climb_rate);
-			bytes[offset + 38] = unchecked((byte)msg.battery);
-			bytes[offset + 39] = unchecked((byte)msg.custom0);
-			bytes[offset + 40] = unchecked((byte)msg.custom1);
-			bytes[offset + 41] = unchecked((byte)msg.custom2);
-			offset += 42;
-			return 235;
 		}
 
 		internal static int Serialize_VIBRATION(this Msg_vibration msg, byte[] bytes, ref int offset)
