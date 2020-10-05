@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MissionPlanner.Utilities;
+using log4net;
 using static MAVLink;
 
 namespace ClientRtkGps
@@ -38,6 +39,8 @@ namespace ClientRtkGps
         private CancellationTokenSource tcpCts;
         private Task tcpServerTask;
         private LinkedList<TcpClient> tcpServerClients = new LinkedList<TcpClient>();
+
+        private static ILog log = LogManager.GetLogger(typeof(RtkTransmitter).FullName);
 
         public void SetTcpServerSink(int port)
         {
@@ -78,8 +81,7 @@ namespace ClientRtkGps
                                 }
                                 catch (Exception ex)
                                 {
-                                    // TODO: handle
-                                    Console.WriteLine(ex);
+                                    log.Error(ex);
                                 }
 
                                 current = next;
@@ -92,14 +94,12 @@ namespace ClientRtkGps
                         { }
                         else
                         {
-                            // TODO: handle
-                            Console.WriteLine(ex);
+                           log.Error(ex);
                         }
                     }
                     catch (Exception ex)
                     {
-                        // TODO: log? handle?
-                        Console.WriteLine(ex);
+                        log.Error(ex);
                     }
                 }
             }, token);
@@ -120,8 +120,7 @@ namespace ClientRtkGps
                         }
                         catch (Exception ex)
                         {
-                            // TODO: log (?)
-                            Console.WriteLine(ex);
+                            log.Error(ex);
                         }
                     }
                     tcpServerClients.Clear();
@@ -136,8 +135,7 @@ namespace ClientRtkGps
                         }
                         catch (Exception ex)
                         {
-                            // TODO: log (?)
-                            Console.WriteLine(ex);
+                            log.Error(ex);
                         }
                         finally
                         {
@@ -310,8 +308,7 @@ namespace ClientRtkGps
                             }
                             catch (Exception ex)
                             {
-                                // TODO: handle
-                                Console.WriteLine(ex);
+                                log.Error(ex);
                             }
 
                             client = next;

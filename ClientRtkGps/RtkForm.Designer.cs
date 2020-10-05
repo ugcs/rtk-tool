@@ -60,6 +60,8 @@
             this.labelmsgseen = new System.Windows.Forms.Label();
             this.lbl_status3 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label16Galileo = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -403,6 +405,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label16Galileo);
+            this.groupBox1.Controls.Add(this.label17);
             this.groupBox1.Controls.Add(this.label10);
             this.groupBox1.Controls.Add(this.label14BDS);
             this.groupBox1.Controls.Add(this.label3);
@@ -419,6 +423,25 @@
             this.groupBox1.TabIndex = 29;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "RTCM";
+            // 
+            // label16Galileo
+            // 
+            this.label16Galileo.BackColor = System.Drawing.Color.Red;
+            this.label16Galileo.ForeColor = System.Drawing.Color.White;
+            this.label16Galileo.Location = new System.Drawing.Point(330, 26);
+            this.label16Galileo.Name = "label16Galileo";
+            this.label16Galileo.Size = new System.Drawing.Size(20, 20);
+            this.label16Galileo.TabIndex = 31;
+            this.label16Galileo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(284, 33);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(39, 13);
+            this.label17.TabIndex = 30;
+            this.label17.Text = "Galileo";
             // 
             // label10
             // 
@@ -575,7 +598,7 @@
             this.m8pGroupBox.Size = new System.Drawing.Size(623, 192);
             this.m8pGroupBox.TabIndex = 38;
             this.m8pGroupBox.TabStop = false;
-            this.m8pGroupBox.Text = "M8P/Here+";
+            this.m8pGroupBox.Text = "M8P/F9P";
             this.m8pGroupBox.Visible = false;
             // 
             // dg_basepos
@@ -689,7 +712,7 @@
             // movingBaseCheckBox
             // 
             this.movingBaseCheckBox.AutoSize = true;
-            this.movingBaseCheckBox.Location = new System.Drawing.Point(101, 19);
+            this.movingBaseCheckBox.Location = new System.Drawing.Point(124, 19);
             this.movingBaseCheckBox.Name = "movingBaseCheckBox";
             this.movingBaseCheckBox.Size = new System.Drawing.Size(88, 17);
             this.movingBaseCheckBox.TabIndex = 33;
@@ -701,9 +724,9 @@
             this.m8pFw130CheckBox.AutoSize = true;
             this.m8pFw130CheckBox.Location = new System.Drawing.Point(6, 19);
             this.m8pFw130CheckBox.Name = "m8pFw130CheckBox";
-            this.m8pFw130CheckBox.Size = new System.Drawing.Size(89, 17);
+            this.m8pFw130CheckBox.Size = new System.Drawing.Size(113, 17);
             this.m8pFw130CheckBox.TabIndex = 32;
-            this.m8pFw130CheckBox.Text = "M8P fw 130+";
+            this.m8pFw130CheckBox.Text = "M8P fw 130+/F9P";
             this.m8pFw130CheckBox.UseVisualStyleBackColor = true;
             // 
             // m8pCheckBox
@@ -711,9 +734,9 @@
             this.m8pCheckBox.AutoSize = true;
             this.m8pCheckBox.Location = new System.Drawing.Point(18, 367);
             this.m8pCheckBox.Name = "m8pCheckBox";
-            this.m8pCheckBox.Size = new System.Drawing.Size(101, 17);
+            this.m8pCheckBox.Size = new System.Drawing.Size(125, 17);
             this.m8pCheckBox.TabIndex = 40;
-            this.m8pCheckBox.Text = "M8P autoconfig";
+            this.m8pCheckBox.Text = "M8P/F9P autoconfig";
             this.m8pCheckBox.UseVisualStyleBackColor = true;
             this.m8pCheckBox.CheckedChanged += new System.EventHandler(this.m8pCheckBox_CheckedChanged);
             // 
@@ -738,13 +761,14 @@
             // radioLinkCheckBox
             // 
             this.radioLinkCheckBox.AutoSize = true;
-            this.radioLinkCheckBox.Location = new System.Drawing.Point(120, 367);
+            this.radioLinkCheckBox.Location = new System.Drawing.Point(140, 367);
             this.radioLinkCheckBox.Margin = new System.Windows.Forms.Padding(2);
             this.radioLinkCheckBox.Name = "radioLinkCheckBox";
             this.radioLinkCheckBox.Size = new System.Drawing.Size(98, 17);
             this.radioLinkCheckBox.TabIndex = 43;
             this.radioLinkCheckBox.Text = "3DR Radio link";
             this.radioLinkCheckBox.UseVisualStyleBackColor = true;
+            this.radioLinkCheckBox.CheckedChanged += new System.EventHandler(this.radioLinkCheckBox_CheckedChanged);
             // 
             // panel1
             // 
@@ -754,7 +778,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(10, 10);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(207, 567);
+            this.panel1.Size = new System.Drawing.Size(201, 567);
             this.panel1.TabIndex = 45;
             // 
             // signalStrengthHeaderLabel
@@ -814,7 +838,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
             this.splitContainer1.Panel2.Padding = new System.Windows.Forms.Padding(10);
             this.splitContainer1.Size = new System.Drawing.Size(896, 587);
-            this.splitContainer1.SplitterDistance = 668;
+            this.splitContainer1.SplitterDistance = 674;
             this.splitContainer1.SplitterWidth = 1;
             this.splitContainer1.TabIndex = 46;
             this.splitContainer1.TabStop = false;
@@ -966,6 +990,8 @@
         private System.Windows.Forms.TextBox overrideIDTextBox;
         private System.Windows.Forms.ComboBox mavMsgTypeComboBox;
         private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label16Galileo;
+        private System.Windows.Forms.Label label17;
     }
 }
 

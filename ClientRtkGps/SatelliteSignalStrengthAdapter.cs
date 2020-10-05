@@ -8,7 +8,8 @@ namespace ClientRtkGps
     enum SatelliteType {
         GPS,
         Glonass,
-        Beidou
+        Beidou,
+        Galileo
     }
 
     class SatelliteSignal
@@ -154,6 +155,7 @@ namespace ClientRtkGps
                         case SatelliteType.GPS:
                         case SatelliteType.Glonass:
                         case SatelliteType.Beidou:
+                        case SatelliteType.Galileo:
                             satelliteTypeName = type.ToString();
                             break;
                         default:

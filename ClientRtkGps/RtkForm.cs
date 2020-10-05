@@ -16,6 +16,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Flurl.Util;
+using log4net;
+using log4net.Config;
 
 namespace ClientRtkGps
 {
@@ -39,6 +41,9 @@ namespace ClientRtkGps
         private static int bps = 0;
         private int bpsusefull = 0;
 
+        private int prevRate;
+        private int radioLinkRate;
+
         private MavMsgsPackedType rtcm_msg = MavMsgsPackedType.GPS_RTCM_DATA;
 
         private bool override_id = false;
@@ -56,9 +61,15 @@ namespace ClientRtkGps
 
         private SatelliteSignalStrengthAdapter signalAdapter;
 
+        private static ILog log = LogManager.GetLogger(typeof(RtkForm).FullName);
+
         public RtkForm()
         {
+            XmlConfigurator.Configure();
+
+            log.Info("Starting...");
             InitializeComponent();
+
             signalAdapter = new SatelliteSignalStrengthAdapter(panel1);
 
             setSerialItems(sourceSelectorComboBox);
@@ -95,15 +106,19 @@ namespace ClientRtkGps
         {
             var settings = Settings.Default;
             settings.Reload();
-            
+
+            radioLinkCheckBox.Checked = settings.RadioLink;
+
             SetComboStringItem(sourceSelectorComboBox, settings.SourceType);
             SetComboStringItem(sourceBaudRateComboBox, settings.SourceBaudRate.ToString());
             sourceSpecificTextBox.Text = settings.SourceSpecificText;
             mavMsgTypeComboBox.SelectedIndex = settings.InjectMsgType;
 
+
             SetComboStringItem(sinkSelectorComboBox, settings.SerialSinkName);
             SetComboStringItem(sinkBaudRateComboBox, settings.SinkBaudRate.ToString());
             serialCheckBox.Checked = settings.UseSerialSink;
+
 
             udpClientTextBox.Text = settings.UdpHost;
             udpClientPortTextBox.Text = settings.UdpPort.ToString();
@@ -117,18 +132,21 @@ namespace ClientRtkGps
             tcpServerPortTextBox.Text = settings.TcpServerPort.ToString();
             tcpServerCheckBox.Checked = settings.UseTcpServerSink;
 
+            radioLinkRate = settings.RadioLinkBaud;
+
+           
             m8pCheckBox.Checked = settings.M8pAutoconfig;
-            radioLinkCheckBox.Checked = settings.RadioLink;
             m8pFw130CheckBox.Checked = settings.M8pFW130;
             movingBaseCheckBox.Checked = settings.MovingBase;
             accTextBox.Text = settings.SurveyInAcc.ToString();
             timeTextBox.Text = settings.M8pTime.ToString();
-                        
+
             SaveSettings();
         }
 
         private void SaveSettings()
         {
+            log.Info("Loaded settings...");
             var settings = Settings.Default;
             int intValue;
             double doubleValue;
@@ -175,6 +193,13 @@ namespace ClientRtkGps
             int.TryParse(timeTextBox.Text, out intValue);
             settings.M8pTime = intValue;
 
+            if (radioLinkCheckBox.Checked)
+            {
+                intValue = 0;
+                int.TryParse(sourceBaudRateComboBox.Text, out intValue);
+                settings.RadioLinkBaud = intValue;
+            }
+
             settings.Save();
         }
 
@@ -188,10 +213,12 @@ namespace ClientRtkGps
                 List<rtcm3.ob> obs = sender as List<rtcm3.ob>;
 
                 if (obs.Count == 0) return;
-
+                    
                 int gpsCount = 0;
                 int glonassCount = 0;
                 int beidouCount = 0;
+                int galileoCount = 0;
+                
 
                 foreach (var ob in obs)
                 {
@@ -205,8 +232,11 @@ namespace ClientRtkGps
                         case 'R':
                             ++glonassCount;
                             break;
-                        case 'C':
+                        case 'B':
                             ++beidouCount;
+                            break;
+                        case 'E':
+                            ++galileoCount;
                             break;
                     }
 
@@ -228,9 +258,13 @@ namespace ClientRtkGps
                         type = SatelliteType.Glonass;
                         labelglonass.Text = glonassCount.ToString();
                         break;
-                    case 'C':
+                    case 'B':
                         type = SatelliteType.Beidou;
                         label14BDS.Text = beidouCount.ToString();
+                        break;
+                    case 'E':
+                        type = SatelliteType.Galileo;
+                        label16Galileo.Text = galileoCount.ToString();
                         break;
                 }
 
@@ -262,7 +296,7 @@ namespace ClientRtkGps
                     catch (Exception ex)
                     {
                         // TODO: log
-                        //log.Error(ex);
+                        log.Error(ex);
                         MessageBox.Show("Failed to load Base Position List\n" + ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
@@ -382,7 +416,7 @@ namespace ClientRtkGps
                                 }
                                 else
                                 {
-                                    // log.Warn("Reconnecting");
+                                    log.Warn("Reconnecting");
                                     // close existing
                                     comPort.Close();
                                     // reopen
@@ -392,9 +426,9 @@ namespace ClientRtkGps
                                 lastrecv = DateTime.Now;
                             }
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // log.Error("Failed to reconnect");
+                            log.Error("Failed to reconnect", ex);
                             // sleep for 10 seconds on error
                             System.Threading.Thread.Sleep(10000);
                         }
@@ -528,7 +562,7 @@ namespace ClientRtkGps
                     catch (Exception ex)
                     {
                         // TODO: log, handle
-                        Console.Write(ex);
+                        log.Error(ex);             
                     }
                 }
             }).Start();
@@ -594,6 +628,20 @@ namespace ClientRtkGps
                             obj.BackColor = Color.Red;
                             obj.Text = null;
                             signalAdapter.SetSignals(SatelliteType.Glonass, null);
+                        });
+                        break;
+                    case 1092:
+                    case 1093:
+                    case 1094:
+                    case 1095:
+                    case 1096:
+                    case 1097:
+                        label16Galileo.BackColor = Color.Green;
+                        SetTimeout(label16Galileo, 5000, (Label obj) =>
+                        {
+                            obj.BackColor = Color.Red;
+                            obj.Text = null;
+                            signalAdapter.SetSignals(SatelliteType.Galileo, null);
                         });
                         break;
                     case 1121:
@@ -670,8 +718,7 @@ namespace ClientRtkGps
             }
             catch (Exception ex)
             {
-                // TODO: log.Error(ex);
-                Console.WriteLine(ex);
+                log.Error(ex);                
             }
         }
 
@@ -808,9 +855,7 @@ namespace ClientRtkGps
             }
             catch (Exception ex)
             {
-                // TODO: log
-                // log.Error(ex);
-                Console.WriteLine(ex);
+                log.Error("Failed to process UBX message", ex);
             }
         }
 
@@ -1025,7 +1070,7 @@ namespace ClientRtkGps
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex);
+                        log.Error(ex);
                         MessageBox.Show("Failed to start UDP sink\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         udpClientCheckBox.Checked = false;
                     }
@@ -1056,7 +1101,7 @@ namespace ClientRtkGps
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex);
+                        log.Error(ex);
                         MessageBox.Show("Failed to start Serial sink\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         serialCheckBox.Checked = false;
                     }             
@@ -1087,7 +1132,7 @@ namespace ClientRtkGps
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex);
+                        log.Error(ex);
                         MessageBox.Show("Failed to start TCP client sink\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         tcpClientCheckBox.Checked = false;
                     }
@@ -1118,7 +1163,7 @@ namespace ClientRtkGps
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex);
+                        log.Error(ex);
                         MessageBox.Show("Failed to start TCP server sink\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         tcpServerCheckBox.Checked = false;
                     }
@@ -1219,9 +1264,7 @@ namespace ClientRtkGps
                             }
                             catch (ArgumentException ex)
                             {
-                                // TODO: log
-                                //log.Error(ex);
-                                Console.WriteLine(ex);
+                                log.Error(ex);                               
 
                                 // try pipe method
                                 comPort = new CommsSerialPipe();
@@ -1242,6 +1285,7 @@ namespace ClientRtkGps
                         catch (Exception ex)
                         {
                             // TODO: catch???
+                            log.Error(ex);
                             throw;
                         }
 
@@ -1255,14 +1299,14 @@ namespace ClientRtkGps
                             if (basepos != MyPointLatLngAlt.Zero)
                                 ubx_m8p.SetupBasePos(comPort, basepos, 0, 0, false, movingBaseCheckBox.Checked);
 
-                            if (radioLinkCheckBox.Checked)
+                            /**if (radioLinkCheckBox.Checked)
                             {
-                                sourceBaudRateComboBox.Text = "9600";
+                               sourceBaudRateComboBox.Text = "9600";
                             }
                             else
                             {
                                 sourceBaudRateComboBox.Text = "115200";
-                            }
+                            }**/
 
                             //this.LogInfo("Setup M8P done");
                         }
@@ -1277,7 +1321,7 @@ namespace ClientRtkGps
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex);
+                    log.Error(ex);
                     MessageBox.Show("Could not connect to serial source", "Connection error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
@@ -1491,6 +1535,14 @@ namespace ClientRtkGps
         private void mavMsgTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             rtcm_msg = (MavMsgsPackedType)mavMsgTypeComboBox.SelectedIndex;
+        }
+
+        private void radioLinkCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioLinkCheckBox.Checked)
+            {
+                this.sourceBaudRateComboBox.Text = "9600";
+            }
         }
     }
 }

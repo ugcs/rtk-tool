@@ -424,8 +424,6 @@ namespace MissionPlanner.Utilities
         {
             port.BaseStream.Flush();
 
-            port.BaudRate = 9600;
-
             System.Threading.Thread.Sleep(100);
 
             if (!radioLink)
@@ -458,6 +456,7 @@ namespace MissionPlanner.Utilities
                 port.Write(packetBaudRateConfig, 0, packetBaudRateConfig.Length);
                 System.Threading.Thread.Sleep(300);
             }
+    
 
             // set rate to 1hz
             var packet = generate(0x6, 0x8, new byte[] { 0xE8, 0x03, 0x01, 0x00, 0x01, 0x00 });
@@ -516,6 +515,11 @@ namespace MissionPlanner.Utilities
             turnon_off(port, 0xf5, 0x54, rate2);
             // 1087 - 1s
             turnon_off(port, 0xf5, 0x57, rate1);
+
+            // 1094 - 1s
+            turnon_off(port, 0xf5, 0x5e, rate2);
+            // 1097 - 1s
+            turnon_off(port, 0xf5, 0x61, rate1);
 
             // 1124 - 1s
             turnon_off(port, 0xf5, 0x7c, rate2);

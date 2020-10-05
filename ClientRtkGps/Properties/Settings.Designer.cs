@@ -286,5 +286,17 @@ namespace ClientRtkGps.Properties {
                 this["InjectMsgType"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("9600")]
+        public int RadioLinkBaud {
+            get {
+                return ((int)(this["RadioLinkBaud"]));
+            }
+            set {
+                this["RadioLinkBaud"] = value;
+            }
+        }
     }
 }
