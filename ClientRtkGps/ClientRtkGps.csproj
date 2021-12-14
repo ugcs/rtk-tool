@@ -47,7 +47,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\mavlink\mavlink.dll</HintPath>
     </Reference>
+    <Reference Include="PortableSettingsProvider, Version=0.2.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PortableSettingsProvider.0.2.4\lib\net45\PortableSettingsProvider.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -63,6 +67,7 @@
     <Compile Include="CustomProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="GpsLogger.cs" />
     <Compile Include="RtkForm.cs">
       <SubType>Form</SubType>
     </Compile>

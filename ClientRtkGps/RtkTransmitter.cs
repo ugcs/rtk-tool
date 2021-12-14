@@ -12,10 +12,10 @@ using System.Threading.Tasks;
 using MissionPlanner.Utilities;
 using log4net;
 using static MAVLink;
+using ClientRtkGps.Properties;
 
 namespace ClientRtkGps
 {
-
     enum MavMsgsPackedType
     {
         GPS_RTCM_DATA,
@@ -23,38 +23,219 @@ namespace ClientRtkGps
         DATA96
     }
 
-    class RtkTransmitter
+    abstract class AbstractSink
     {
-        private object serialLocker = new object();
-        private SerialPort serialSink;
+      
+        public bool Enabled { get; set; }
+        protected DateTime lastTimeSent;
+        protected DateTime lastReconnectAttempt;
+        private double RECONNECT_DELAY = 2;
+        protected static ILog log = LogManager.GetLogger(typeof(AbstractSink).FullName);
+        private object innerlock = new object();
 
-        private object udpLocker = new object();
-        private Socket udpSink;
-
-        private object tcpClientLocker = new object();
-        private Socket tcpClientSink;
-
-        private object tcpServerLocker = new object();
-        private TcpListener tcpServerSink;
-        private CancellationTokenSource tcpCts;
-        private Task tcpServerTask;
-        private LinkedList<TcpClient> tcpServerClients = new LinkedList<TcpClient>();
-
-        private static ILog log = LogManager.GetLogger(typeof(RtkTransmitter).FullName);
-
-        public void SetTcpServerSink(int port)
+        protected void Connect()
         {
-            lock (tcpServerLocker)
+            lock (innerlock)
             {
-                DisableTcpServerSink();
-                tcpServerSink = new TcpListener(IPAddress.Any, port);
-                tcpServerSink.Start();
-                ListenNonBlocking();
+                DoDisconnect();
+                DoConnect();
+                Enabled = true;
             }
         }
 
-        private void ListenNonBlocking()
+        public void Disconnect()
         {
+            lock (innerlock)
+            {
+                DoDisconnect();
+                Enabled = false;
+            }
+        }
+
+        public void Send(byte[]  data)
+        {
+            lock (innerlock)
+            {
+                try
+                {
+                    // Do not send data while we trying to reconnect
+                    if (DateTime.Now - lastReconnectAttempt < TimeSpan.FromSeconds(RECONNECT_DELAY))
+                        return;
+
+                    DoSend(data);
+                    lastTimeSent = DateTime.Now;
+                    
+                }
+                catch (Exception ex)
+                {
+                    log.Error(ex);
+                    if (DateTime.Now - lastReconnectAttempt > TimeSpan.FromSeconds(RECONNECT_DELAY))
+                    {
+                        log.Warn("Reconnecting...");
+
+                        lastReconnectAttempt = DateTime.Now; // Reset stopwatch to avoid endless Reconnection
+                        try
+                        {
+                            DoDisconnect();
+                            DoConnect();
+                        } catch (Exception exrec)
+                        {
+                            log.Error("Failed to reconnect.", exrec);
+                        }
+                    }
+                }
+            }
+        }
+
+        protected abstract void DoConnect();
+        protected abstract void DoSend(byte[] data);
+        protected abstract void DoDisconnect();              
+    }
+
+    class SerialSink : AbstractSink
+    {
+        private SerialPort serialSink;
+        private string port;
+        private int baudRate;
+
+        public void Enable(string port, int baudRate)
+        {
+            this.port = port;
+            this.baudRate = baudRate;
+            Connect();
+        }
+
+        protected override void DoConnect()
+        {
+            serialSink = new SerialPort(port);
+            serialSink.BaudRate = baudRate;
+            serialSink.Open();
+            log.Info("Connected to Serial " + port + ":" + baudRate);
+        }
+
+        protected override  void DoDisconnect()
+        {
+            if (serialSink != null)
+            {                
+                serialSink.Close();
+                serialSink = null;
+            }
+        }
+
+        protected override void DoSend(byte[] data)
+        {
+            if (serialSink != null)
+            {
+                serialSink.Write(data, 0, data.Length);             
+            }
+        }
+    }
+
+    class UdpSink : AbstractSink
+    {
+        private Socket udpSink;
+        private IPEndPoint endPoint;
+        private IPEndPoint localEndPoint;
+        private string host;
+        private int port;
+        private int localPort;
+
+        public void Enable(string host, int port)
+        {
+            this.host = host;
+            this.port = port;
+            this.localPort = Settings.Default.UdpLocalPort; 
+            Connect();            
+        }
+
+        protected override void DoConnect()
+        {
+            udpSink = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            endPoint = new IPEndPoint(IPAddress.Parse(host), port);
+            localEndPoint = new IPEndPoint(IPAddress.Any, localPort);
+            
+            udpSink.Bind(localEndPoint);
+            
+            log.Info("Connected to Udp " + host + ":" + port);
+        }
+
+        protected override void DoDisconnect()
+        {
+            if (udpSink != null)
+            {
+                udpSink.Close();
+                udpSink = null;
+            }
+        }
+
+        protected override void DoSend(byte[] data)
+        {
+            if (udpSink != null)
+            {
+                udpSink.SendTo(data, endPoint);
+            }
+        }
+    }
+
+    class TcpClientSink : AbstractSink
+    {
+        private Socket tcpClientSink;
+        private string host;
+        private int port;
+
+        public void Enable(string host, int port)
+        {
+            this.host = host;
+            this.port = port;
+            Connect();
+        }
+
+        protected override void DoDisconnect()
+        {
+            if (tcpClientSink != null)
+            {
+                tcpClientSink.Close();
+                tcpClientSink = null;
+            }
+        }
+
+        protected override void DoConnect()
+        {
+            tcpClientSink = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            tcpClientSink.Connect(host, port);
+            log.Info("Connected to Tcp " + host + ":" + port);
+        }
+
+        protected override void DoSend(byte[] data)
+        {
+            if (tcpClientSink != null)
+            {
+                tcpClientSink.Send(data);
+            }
+        }
+    }
+
+    class TcpServerSink : AbstractSink
+    {
+        private CancellationTokenSource tcpCts;
+        private Task tcpServerTask;
+        private LinkedList<TcpClient> tcpServerClients = new LinkedList<TcpClient>();
+        private int port;
+        private TcpListener tcpServerSink;
+        private object tcpServerLocker = new object();
+
+        public void Enable(int port)
+        {
+            this.port = port;
+            Connect();
+        }
+
+
+        protected override void DoConnect()
+        {
+            tcpServerSink = new TcpListener(IPAddress.Any, port);
+            tcpServerSink.Start();
+
             tcpCts = new CancellationTokenSource();
             var token = tcpCts.Token;
             tcpServerTask = Task.Factory.StartNew(() =>
@@ -94,7 +275,7 @@ namespace ClientRtkGps
                         { }
                         else
                         {
-                           log.Error(ex);
+                            log.Error(ex);
                         }
                     }
                     catch (Exception ex)
@@ -103,50 +284,114 @@ namespace ClientRtkGps
                     }
                 }
             }, token);
+            log.Info("Connected as Server on " + port);
         }
+
+        protected override void DoDisconnect()
+        {
+            if (tcpServerSink != null)
+            {
+                foreach (var client in tcpServerClients)
+                {
+                    try
+                    {
+                        client.Close();
+                        client.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error(ex);
+                    }
+                }
+                tcpServerClients.Clear();
+                tcpServerSink.Stop();
+
+                if (tcpServerTask != null)
+                {
+                    tcpCts.Cancel();
+                    try
+                    {
+                        tcpServerTask.Wait(5000);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error(ex);
+                    }
+                    finally
+                    {
+                        tcpCts.Dispose();
+                    }
+                }
+
+                tcpCts = null;
+                tcpServerTask = null;
+            }
+        }
+
+        protected override void DoSend(byte[] data)
+        {
+            if (tcpServerSink != null)
+            {
+                var client = tcpServerClients.First;
+                while (client != null)
+                {
+                    var next = client.Next;
+                    try
+                    {
+                        if (!client.Value.Connected)
+                        {
+                            tcpServerClients.Remove(client);
+                        }
+                        else
+                        {
+                            client.Value.GetStream().Write(data, 0, data.Length);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error(ex);
+                    }
+
+                    client = next;
+                }
+            }
+        }
+    }
+
+    class RtkTransmitter
+    {
+        private SerialSink serialSink = new SerialSink();
+        private UdpSink udpSink = new UdpSink();
+        private TcpClientSink tcpClientSink = new TcpClientSink();
+        private TcpServerSink tcpServerSink = new TcpServerSink();
+        private List<AbstractSink> sinks;
+
+        // we will put this copmonents id to mavlink messages to
+        // separate channels onboard
+        private byte wifiCompIdSettings = 25;
+        private byte serialCompIdSettings = 26;
+
+        private static ILog log = LogManager.GetLogger(typeof(RtkTransmitter).FullName);
+
+        public void SetCompIdSettings(byte wifiCompId, byte serialCompId)
+        {
+            wifiCompIdSettings = wifiCompId;
+            serialCompIdSettings = serialCompId;
+        }
+        
+        public RtkTransmitter()
+        {
+            sinks = new List<AbstractSink> { serialSink, udpSink, tcpClientSink, tcpServerSink };
+        }
+
+        public void SetTcpServerSink(int port)
+        {          
+            tcpServerSink.Enable(port);           
+        }      
 
         public void DisableTcpServerSink()
         {
-            lock (tcpServerLocker)
-            {
-                if (tcpServerSink != null)
-                {
-                    foreach (var client in tcpServerClients)
-                    {
-                        try
-                        {
-                            client.Close();
-                            client.Dispose();
-                        }
-                        catch (Exception ex)
-                        {
-                            log.Error(ex);
-                        }
-                    }
-                    tcpServerClients.Clear();
-                    tcpServerSink.Stop();
-
-                    if (tcpServerTask != null)
-                    {
-                        tcpCts.Cancel();
-                        try
-                        {
-                            tcpServerTask.Wait(5000);
-                        }
-                        catch (Exception ex)
-                        {
-                            log.Error(ex);
-                        }
-                        finally
-                        {
-                            tcpCts.Dispose();
-                        }
-                    }
-
-                    tcpCts = null;
-                    tcpServerTask = null;
-                }
-            }
+            tcpServerSink.Disconnect();
         }
 
         /// <summary>
@@ -156,25 +401,12 @@ namespace ClientRtkGps
         /// <param name="serialPortName"></param>
         public void SetSerialSink(string serialPortName, int baudRate)
         {
-            lock (serialLocker)
-            {
-                DisableSerialSink();
-                serialSink = new SerialPort(serialPortName);
-                serialSink.BaudRate = baudRate;
-                serialSink.Open();
-            }
+            serialSink.Enable(serialPortName, baudRate);
         }
 
         public void DisableSerialSink()
         {
-            lock (serialLocker)
-            {
-                if (serialSink != null)
-                {
-                    serialSink.Close();
-                    serialSink = null;
-                }
-            }
+            serialSink.Disconnect();
         }
 
 
@@ -185,27 +417,12 @@ namespace ClientRtkGps
         /// <param name="host"></param>
         public void SetTcpClientSink(string host, int port)
         {
-            lock (tcpClientLocker)
-            {
-                DisableTcpClientSink();
-
-                tcpClientSink = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                //var uri = new Uri(url);
-                //udpSink.Connect(uri.Host, uri.Port);
-                tcpClientSink.Connect(host, port);
-            }
+            tcpClientSink.Enable(host, port);
         }
 
         public void DisableTcpClientSink()
         {
-            lock (tcpClientLocker)
-            {
-                if (tcpClientSink != null)
-                {
-                    tcpClientSink.Close();
-                    tcpClientSink = null;
-                }
-            }
+            tcpClientSink.Disconnect();           
         }
 
         /// <summary>
@@ -215,33 +432,23 @@ namespace ClientRtkGps
         /// <param name="host"></param>
         public void SetUdpClientSink(string host, int port)
         {
-            lock (udpLocker)
-            {
-                DisableUdpClientSink();
-                udpSink = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                //var uri = new Uri(url);
-                //udpSink.Connect(uri.Host, uri.Port);
-                udpSink.Connect(host, port);
-            }
+            udpSink.Enable(host, port);
         }
 
         public void DisableUdpClientSink()
         {
-            lock (udpLocker)
-            {
-                if (udpSink != null)
-                {
-                    udpSink.Close();
-                    udpSink = null;
-                }
-            }
+            udpSink.Disconnect();
         }
 
         private const int SYSTEM_ID = 255;
-        private const int COMPONENT_ID = 190;
 
         private Mavlink mav = new Mavlink();
         private byte mavMsg = 0;
+
+        public DateTime lastTimeSent;
+        public DateTime LastTimeSet {
+             get { return this.lastTimeSent; }
+        }
 
         /// <summary>
         /// 
@@ -255,67 +462,31 @@ namespace ClientRtkGps
             packet.Message = message;
             packet.SequenceNumber = mavMsg++;
             packet.SystemId = SYSTEM_ID;
-            packet.ComponentId = COMPONENT_ID;
+            packet.ComponentId = wifiCompIdSettings;
             packet.TimeStamp = DateTime.Now;
             // TODO: systemid, componentid (?)
-            byte[] serializedMessage = mav.Send(packet); // mav.Serialize(message, 0, 0);
-            
-            // TODO: add all send methods
-            Parallel.Invoke(() => {
-                lock (udpLocker)
-                {
-                    if (udpSink != null)
-                    {
-                        udpSink.Send(serializedMessage);
-                    }
-                }
-            }, () => {
-                lock (tcpClientLocker)
-                {
-                    if (tcpClientSink != null)
-                    {
-                        tcpClientSink.Send(serializedMessage);
-                    }
-                }
-            }, () => {
-                lock (serialLocker)
-                {
-                    if (serialSink != null)
-                    {
-                        serialSink.Write(serializedMessage, 0, serializedMessage.Length);
-                    }
-                }
-            }, () =>
-            {
-                lock (tcpServerLocker)
-                {
-                    if (tcpServerSink != null)
-                    {
-                        var client = tcpServerClients.First;
-                        while (client != null)
-                        {
-                            var next = client.Next;
-                            try
-                            {
-                                if (!client.Value.Connected)
-                                {
-                                    tcpServerClients.Remove(client);
-                                }
-                                else
-                                {
-                                    client.Value.GetStream().Write(serializedMessage, 0, serializedMessage.Length);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                log.Error(ex);
-                            }
+            byte[] serializedMessageWiFi = mav.Send(packet); // mav.Serialize(message, 0, 0);
 
-                            client = next;
+            packet.ComponentId = serialCompIdSettings;
+            byte[] serializedMessageSerial = mav.Send(packet);
+
+            Parallel.ForEach(sinks, sink => { 
+                lock(sink)
+                {
+                    if (sink.Enabled)
+                    {
+                        if (sink.GetType() == typeof(SerialSink))
+                        {
+                            sink.Send(serializedMessageSerial);
                         }
+                        else
+                        {
+                            sink.Send(serializedMessageWiFi);
+                        }
+                        lastTimeSent = DateTime.Now;
                     }
                 }
-            });
+            });          
         }
 
         int rtcmSequenceNumber = 0;

@@ -31,6 +31,11 @@ namespace ClientRtkGps
         private sbp sbp = new sbp();
         // ubx detection
         private ubx_m8p ubx_m8p = new ubx_m8p();
+        
+        // we will put this copmonents id to mavlink messages to
+        // separate channels onboard
+        private byte wifiCompId = 25;
+        private byte serialCompId = 26;
 
         private nmea nmea = new nmea();
         private bool threadrun = false;
@@ -63,6 +68,10 @@ namespace ClientRtkGps
 
         private static ILog log = LogManager.GetLogger(typeof(RtkForm).FullName);
 
+        private string rtcmLogDir;
+        bool logRtcm;
+        private GpsLogger rtcmLogger;
+
         public RtkForm()
         {
             XmlConfigurator.Configure();
@@ -87,6 +96,11 @@ namespace ClientRtkGps
             sourceSettingsDictionary.Add(SourceType.FILE, "capture.txt");
 
             LoadSettings();
+            transmitter.SetCompIdSettings(wifiCompId, serialCompId);
+
+            rtcmLogger = new GpsLogger(rtcmLogDir, "log-gps_rtcm.log");
+
+            setGroupBoxNTRIPVisibility();
         }
 
         private void SetComboStringItem(ComboBox comboBox, string name)
@@ -140,6 +154,12 @@ namespace ClientRtkGps
             movingBaseCheckBox.Checked = settings.MovingBase;
             accTextBox.Text = settings.SurveyInAcc.ToString();
             timeTextBox.Text = settings.M8pTime.ToString();
+
+            rtcmLogDir = settings.RtcmLogDir.ToString();
+            logRtcm = settings.RtcmLogEnabled;
+
+            wifiCompId = settings.WifiCompId;
+            serialCompId = settings.SerialCompId;
 
             SaveSettings();
         }
@@ -461,6 +481,7 @@ namespace ClientRtkGps
                             bytes += read;
                             bps += read;
 
+
                             // if this is raw data transport of unknown packet types
                             //if (!(isrtcm || issbp))
                             //    sendData(buffer, (byte)read);
@@ -502,6 +523,7 @@ namespace ClientRtkGps
                                     }
 
                                     sendData(rtcm3.packet, (byte)rtcm3.length);
+
                                     bpsusefull += rtcm3.length;
                                     string msgname = "Rtcm" + seenmsg;
                                     if (!msgseen.ContainsKey(msgname))
@@ -571,6 +593,11 @@ namespace ClientRtkGps
         private void sendData(byte[] data, byte length)
         {
             transmitter.Send(data, length, rtcm_msg);
+
+            if (DateTime.Now - transmitter.LastTimeSet < TimeSpan.FromSeconds(2) && logRtcm)
+            {
+                rtcmLogger.Write(data, length);
+            }           
         }
 
         private void seenRTCM(int seenmsg)
@@ -1011,6 +1038,14 @@ namespace ClientRtkGps
                 default:
                     break;
             }
+
+            setGroupBoxNTRIPVisibility();
+        }
+
+        private void setGroupBoxNTRIPVisibility()
+        {
+            var descriptor = (SourceDescriptor)sourceSelectorComboBox.SelectedItem;
+            groupBoxNTRIP.Visible = (descriptor != null && descriptor.Type == SourceType.NTRIP);
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -1066,7 +1101,6 @@ namespace ClientRtkGps
                         transmitter.SetUdpClientSink(udpClientTextBox.Text, port);
                         udpClientTextBox.Enabled = false;
                         udpClientPortTextBox.Enabled = false;
-
                     }
                     catch (Exception ex)
                     {
@@ -1251,6 +1285,14 @@ namespace ClientRtkGps
                                 var ntripClient = new CommsNTRIP();
                                 ntripClient.URL = sourceSpecificTextBox.Text;
                                 comPort = ntripClient;
+                                bool parseResult = true;
+                                parseResult &= double.TryParse(textBoxNTRIPLat.Text, out ntripClient.lat);
+                                parseResult &= double.TryParse(textBoxNTRIPLon.Text, out ntripClient.lng);
+                                parseResult &= double.TryParse(textBoxNTRIPAlt.Text, out ntripClient.alt);
+                                if (!parseResult)
+                                {
+                                    MessageBox.Show("Can not parse NTRIP Lat/Lon/Alt values. Service may not work properly. Re-enter proper values and reconnect. ", "Position values error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
                                 break;
                         }
 
@@ -1543,6 +1585,16 @@ namespace ClientRtkGps
             {
                 this.sourceBaudRateComboBox.Text = "9600";
             }
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label16_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

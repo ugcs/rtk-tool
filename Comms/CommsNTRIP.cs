@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
@@ -171,9 +171,16 @@ namespace MissionPlanner.Comms
                           + auth
                           + "Connection: close\r\n\r\n";
 
-            sw.Write(line);
+            var linev2 = "GET " + remoteUri.PathAndQuery + " HTTP/1.1\r\n"
+                         + "Host: " + remoteUri.Host + ":" + remoteUri.Port + "\r\n"
+                         + "Ntrip-Version: Ntrip/2.0\r\n"
+                         + "User-Agent: NTRIP MissionPlanner/1.0\r\n"
+                         + auth
+                         + "Connection: close\r\n\r\n";
 
-            log.Info(line);
+            sw.Write(linev2);
+
+            log.Info(linev2);
 
             sw.Flush();
 

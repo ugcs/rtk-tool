@@ -298,5 +298,65 @@ namespace ClientRtkGps.Properties {
                 this["RadioLinkBaud"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RtcmLogEnabled {
+            get {
+                return ((bool)(this["RtcmLogEnabled"]));
+            }
+            set {
+                this["RtcmLogEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("%LOCALAPPDATA%/DSS/logs/ClientRtkGps")]
+        public string RtcmLogDir {
+            get {
+                return ((string)(this["RtcmLogDir"]));
+            }
+            set {
+                this["RtcmLogDir"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("14555")]
+        public int UdpLocalPort {
+            get {
+                return ((int)(this["UdpLocalPort"]));
+            }
+            set {
+                this["UdpLocalPort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("25")]
+        public byte WifiCompId {
+            get {
+                return ((byte)(this["WifiCompId"]));
+            }
+            set {
+                this["WifiCompId"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("26")]
+        public byte SerialCompId {
+            get {
+                return ((byte)(this["SerialCompId"]));
+            }
+            set {
+                this["SerialCompId"] = value;
+            }
+        }
     }
 }

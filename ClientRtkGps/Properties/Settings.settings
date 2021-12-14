@@ -71,5 +71,20 @@
     <Setting Name="RadioLinkBaud" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">9600</Value>
     </Setting>
+    <Setting Name="RtcmLogEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="RtcmLogDir" Type="System.String" Scope="User">
+      <Value Profile="(Default)">%LOCALAPPDATA%/DSS/logs/ClientRtkGps</Value>
+    </Setting>
+    <Setting Name="UdpLocalPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">14555</Value>
+    </Setting>
+    <Setting Name="WifiCompId" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">25</Value>
+    </Setting>
+    <Setting Name="SerialCompId" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">26</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
