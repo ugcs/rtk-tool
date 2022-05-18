@@ -19,12 +19,23 @@ namespace ClientRtkGps
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            
-            PortableSettingsProvider.SettingsFileName = "ClientRtkGps.config";
-            PortableSettingsProvider.SettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"DSS\configuration\");
-            PortableSettingsProvider.ApplyProvider(Settings.Default);
+
+            settings();
 
             Application.Run(new RtkForm());
         }
+
+        private static void settings()
+        {
+            if (!Directory.Exists(ApplicationPaths.UserConfigDir))
+            {
+                Directory.CreateDirectory(ApplicationPaths.UserConfigDir);
+            }
+
+            PortableSettingsProvider.SettingsFileName = ApplicationPaths.ClientRtkGpsConfig;
+            PortableSettingsProvider.SettingsDirectory = ApplicationPaths.UserConfigDir;
+            PortableSettingsProvider.ApplyProvider(Settings.Default);
+        }
+
     }
 }

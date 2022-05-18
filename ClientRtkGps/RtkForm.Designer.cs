@@ -99,17 +99,17 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.signalStrengthHeaderLabel = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.groupBoxNTRIP = new System.Windows.Forms.GroupBox();
+            this.label19 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.textBoxNTRIPAlt = new System.Windows.Forms.TextBox();
+            this.textBoxNTRIPLon = new System.Windows.Forms.TextBox();
+            this.textBoxNTRIPLat = new System.Windows.Forms.TextBox();
             this.mavMsgTypeComboBox = new System.Windows.Forms.ComboBox();
             this.label15 = new System.Windows.Forms.Label();
             this.overrideIDTextBox = new System.Windows.Forms.TextBox();
             this.overrideIDCheckBox = new System.Windows.Forms.CheckBox();
-            this.groupBoxNTRIP = new System.Windows.Forms.GroupBox();
-            this.textBoxNTRIPLat = new System.Windows.Forms.TextBox();
-            this.textBoxNTRIPLon = new System.Windows.Forms.TextBox();
-            this.textBoxNTRIPAlt = new System.Windows.Forms.TextBox();
-            this.label16 = new System.Windows.Forms.Label();
-            this.label18 = new System.Windows.Forms.Label();
-            this.label19 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -786,8 +786,9 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(10, 10);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(198, 684);
+            this.panel1.Size = new System.Drawing.Size(189, 684);
             this.panel1.TabIndex = 45;
+            this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
             // 
             // signalStrengthHeaderLabel
             // 
@@ -847,10 +848,78 @@
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
             this.splitContainer1.Panel2.Padding = new System.Windows.Forms.Padding(10);
             this.splitContainer1.Size = new System.Drawing.Size(896, 704);
-            this.splitContainer1.SplitterDistance = 677;
+            this.splitContainer1.SplitterDistance = 686;
             this.splitContainer1.SplitterWidth = 1;
             this.splitContainer1.TabIndex = 46;
             this.splitContainer1.TabStop = false;
+            // 
+            // groupBoxNTRIP
+            // 
+            this.groupBoxNTRIP.Controls.Add(this.label19);
+            this.groupBoxNTRIP.Controls.Add(this.label18);
+            this.groupBoxNTRIP.Controls.Add(this.label16);
+            this.groupBoxNTRIP.Controls.Add(this.textBoxNTRIPAlt);
+            this.groupBoxNTRIP.Controls.Add(this.textBoxNTRIPLon);
+            this.groupBoxNTRIP.Controls.Add(this.textBoxNTRIPLat);
+            this.groupBoxNTRIP.Location = new System.Drawing.Point(18, 589);
+            this.groupBoxNTRIP.Name = "groupBoxNTRIP";
+            this.groupBoxNTRIP.Size = new System.Drawing.Size(624, 66);
+            this.groupBoxNTRIP.TabIndex = 49;
+            this.groupBoxNTRIP.TabStop = false;
+            this.groupBoxNTRIP.Text = "Location for NTRIP provider";
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(226, 21);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(42, 13);
+            this.label19.TabIndex = 5;
+            this.label19.Text = "Altitude";
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(119, 21);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(54, 13);
+            this.label18.TabIndex = 4;
+            this.label18.Text = "Longitude";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(13, 21);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(45, 13);
+            this.label16.TabIndex = 3;
+            this.label16.Text = "Latitude";
+            this.label16.Click += new System.EventHandler(this.label16_Click);
+            // 
+            // textBoxNTRIPAlt
+            // 
+            this.textBoxNTRIPAlt.Location = new System.Drawing.Point(222, 40);
+            this.textBoxNTRIPAlt.Name = "textBoxNTRIPAlt";
+            this.textBoxNTRIPAlt.Size = new System.Drawing.Size(100, 20);
+            this.textBoxNTRIPAlt.TabIndex = 2;
+            this.textBoxNTRIPAlt.Text = "0.0000";
+            // 
+            // textBoxNTRIPLon
+            // 
+            this.textBoxNTRIPLon.Location = new System.Drawing.Point(116, 40);
+            this.textBoxNTRIPLon.Name = "textBoxNTRIPLon";
+            this.textBoxNTRIPLon.Size = new System.Drawing.Size(100, 20);
+            this.textBoxNTRIPLon.TabIndex = 1;
+            this.textBoxNTRIPLon.Text = "0.00000";
+            this.textBoxNTRIPLon.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
+            // 
+            // textBoxNTRIPLat
+            // 
+            this.textBoxNTRIPLat.Location = new System.Drawing.Point(10, 40);
+            this.textBoxNTRIPLat.Name = "textBoxNTRIPLat";
+            this.textBoxNTRIPLat.Size = new System.Drawing.Size(100, 20);
+            this.textBoxNTRIPLat.TabIndex = 0;
+            this.textBoxNTRIPLat.Text = "0.00000";
             // 
             // mavMsgTypeComboBox
             // 
@@ -894,74 +963,6 @@
             this.overrideIDCheckBox.Text = "Override Station ID (max 4095)";
             this.overrideIDCheckBox.UseVisualStyleBackColor = true;
             this.overrideIDCheckBox.CheckedChanged += new System.EventHandler(this.overrideIDCheckBox_CheckedChanged);
-            // 
-            // groupBoxNTRIP
-            // 
-            this.groupBoxNTRIP.Controls.Add(this.label19);
-            this.groupBoxNTRIP.Controls.Add(this.label18);
-            this.groupBoxNTRIP.Controls.Add(this.label16);
-            this.groupBoxNTRIP.Controls.Add(this.textBoxNTRIPAlt);
-            this.groupBoxNTRIP.Controls.Add(this.textBoxNTRIPLon);
-            this.groupBoxNTRIP.Controls.Add(this.textBoxNTRIPLat);
-            this.groupBoxNTRIP.Location = new System.Drawing.Point(18, 589);
-            this.groupBoxNTRIP.Name = "groupBoxNTRIP";
-            this.groupBoxNTRIP.Size = new System.Drawing.Size(624, 66);
-            this.groupBoxNTRIP.TabIndex = 49;
-            this.groupBoxNTRIP.TabStop = false;
-            this.groupBoxNTRIP.Text = "Location for NTRIP provider";
-            // 
-            // textBoxNTRIPLat
-            // 
-            this.textBoxNTRIPLat.Location = new System.Drawing.Point(10, 40);
-            this.textBoxNTRIPLat.Name = "textBoxNTRIPLat";
-            this.textBoxNTRIPLat.Size = new System.Drawing.Size(100, 20);
-            this.textBoxNTRIPLat.TabIndex = 0;
-            this.textBoxNTRIPLat.Text = "0.00000";
-            // 
-            // textBoxNTRIPLon
-            // 
-            this.textBoxNTRIPLon.Location = new System.Drawing.Point(116, 40);
-            this.textBoxNTRIPLon.Name = "textBoxNTRIPLon";
-            this.textBoxNTRIPLon.Size = new System.Drawing.Size(100, 20);
-            this.textBoxNTRIPLon.TabIndex = 1;
-            this.textBoxNTRIPLon.Text = "0.00000";
-            this.textBoxNTRIPLon.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
-            // 
-            // textBoxNTRIPAlt
-            // 
-            this.textBoxNTRIPAlt.Location = new System.Drawing.Point(222, 40);
-            this.textBoxNTRIPAlt.Name = "textBoxNTRIPAlt";
-            this.textBoxNTRIPAlt.Size = new System.Drawing.Size(100, 20);
-            this.textBoxNTRIPAlt.TabIndex = 2;
-            this.textBoxNTRIPAlt.Text = "0.0000";
-            // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(13, 21);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(45, 13);
-            this.label16.TabIndex = 3;
-            this.label16.Text = "Latitude";
-            this.label16.Click += new System.EventHandler(this.label16_Click);
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(119, 21);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(54, 13);
-            this.label18.TabIndex = 4;
-            this.label18.Text = "Longitude";
-            // 
-            // label19
-            // 
-            this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(226, 21);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(42, 13);
-            this.label19.TabIndex = 5;
-            this.label19.Text = "Altitude";
             // 
             // RtkForm
             // 

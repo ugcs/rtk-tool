@@ -20,9 +20,13 @@ public class GpsLogger
     }
 
 
-    public void Write(byte[]  data, int size)
+    public void Write(byte[]  data, int size, bool result)
     {
         string dateTime = DateTime.UtcNow.ToString("HH:mm:ss.fff") + "   ";
+        if (!result)
+        {
+            dateTime += "ERROR   ";
+        }
 
         rtcmStream.Write(dateTime);
         rtcmStream.WriteLine(BitConverter.ToString(data, 0, size).Replace("-",""));

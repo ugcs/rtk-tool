@@ -675,24 +675,22 @@ namespace ClientRtkGps
         }
         */
 
-        public void Send(byte[] data, int length, MavMsgsPackedType mavType)
+        public bool Send(byte[] data, int length, MavMsgsPackedType mavType)
         {
             if (mavType == MavMsgsPackedType.GPS_RTCM_DATA) {
 
                 Msg_gps_rtcm_data message = new Msg_gps_rtcm_data();
                 const byte RTCM_MSGLEN = 180;
 
-                // TODO: handle ... log.Error("Message too large " + length);
-                //if (length > msglen * 4)
-                //{
-                //    Console.Write("Message too large " + length);
-                //}
-
                 // number of packets we need, including a termination packet if needed
-                var nopackets = (length % RTCM_MSGLEN) == 0 ? length / RTCM_MSGLEN + 1 : (length / RTCM_MSGLEN) + 1;
+                //var nopackets = (length % RTCM_MSGLEN) == 0 ? length / RTCM_MSGLEN + 1 : (length / RTCM_MSGLEN) + 1;
+                var nopackets = length / RTCM_MSGLEN + 1;
 
-                if (nopackets >= 4)
-                    nopackets = 4;
+                if (nopackets > 4)
+                {
+                    log.Error("Too large message (" + length + ") for GPS_RTCM_DATA to be sent.");
+                    return false;
+                }
 
                 for (int a = 0; a < nopackets; a++)
                 {
@@ -776,6 +774,8 @@ namespace ClientRtkGps
                 rtcmSequenceNumber++;
 
             }
+
+            return true;
         }
     }
 }

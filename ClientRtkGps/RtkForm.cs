@@ -3,17 +3,13 @@ using MissionPlanner.Comms;
 using MissionPlanner.Utilities;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Flurl.Util;
 using log4net;
@@ -58,7 +54,7 @@ namespace ClientRtkGps
 
         private string status_line3;
 
-        private string basepostlistfile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ClientRtkGps", "baseposlist.xml");
+        private string basepostlistfile = Path.Combine(ApplicationPaths.UserConfigDir, ApplicationPaths.BasepostlistFile);
 
         private RtkTransmitter transmitter;
         private List<NamedPointLatLngAlt> baseposList = new List<NamedPointLatLngAlt>();
@@ -94,6 +90,8 @@ namespace ClientRtkGps
             rtcm3.ObsMessage += Rtcm3_ObsMessage;
 
             sourceSettingsDictionary.Add(SourceType.FILE, "capture.txt");
+
+            sourceSettingsDictionary.Add(SourceType.LOG, "log-gps_rtcm.log");
 
             LoadSettings();
             transmitter.SetCompIdSettings(wifiCompId, serialCompId);
@@ -379,7 +377,8 @@ namespace ClientRtkGps
             UDP_CLIENT,
             TCP_CLIENT,
             NTRIP,
-            FILE
+            FILE, 
+            LOG
         }
 
         private class SourceDescriptor
@@ -407,6 +406,7 @@ namespace ClientRtkGps
             comboBox.Items.Add(new SourceDescriptor("TCP Client", SourceType.TCP_CLIENT));
             comboBox.Items.Add(new SourceDescriptor("NTRIP", SourceType.NTRIP));
             comboBox.Items.Add(new SourceDescriptor("Dump File", SourceType.FILE));
+            comboBox.Items.Add(new SourceDescriptor("Log File", SourceType.LOG));
         }
 
         private void RunMainLoop()
@@ -522,7 +522,7 @@ namespace ClientRtkGps
                                         }
                                     }
 
-                                    sendData(rtcm3.packet, (byte)rtcm3.length);
+                                    sendData(rtcm3.packet, rtcm3.length);
 
                                     bpsusefull += rtcm3.length;
                                     string msgname = "Rtcm" + seenmsg;
@@ -590,13 +590,13 @@ namespace ClientRtkGps
             }).Start();
         }
 
-        private void sendData(byte[] data, byte length)
+        private void sendData(byte[] data, int length)
         {
-            transmitter.Send(data, length, rtcm_msg);
+            var result = transmitter.Send(data, length, rtcm_msg);
 
             if (DateTime.Now - transmitter.LastTimeSet < TimeSpan.FromSeconds(2) && logRtcm)
             {
-                rtcmLogger.Write(data, length);
+                rtcmLogger.Write(data, length, result);
             }           
         }
 
@@ -1060,7 +1060,10 @@ namespace ClientRtkGps
             {
                 foreach (var item in msgseen.Keys)
                 {
-                    sb.Append(item + "=" + msgseen[item] + " ");
+                    if (!item.Contains("Ubx"))
+                    {
+                        sb.Append(item + "=" + msgseen[item] + " ");
+                    }
                 }
             }
             catch
@@ -1262,6 +1265,10 @@ namespace ClientRtkGps
                                 break;
                             case SourceType.FILE:
                                 comPort = new CommsFile();
+                                comPort.PortName = sourceSpecificTextBox.Text;
+                                break;
+                            case SourceType.LOG:
+                                comPort = new CommsLog();
                                 comPort.PortName = sourceSpecificTextBox.Text;
                                 break;
                             case SourceType.UDP_CLIENT:
@@ -1593,6 +1600,11 @@ namespace ClientRtkGps
         }
 
         private void label16_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
         {
 
         }
