@@ -1293,9 +1293,9 @@ namespace ClientRtkGps
                                 ntripClient.URL = sourceSpecificTextBox.Text;
                                 comPort = ntripClient;
                                 bool parseResult = true;
-                                parseResult &= double.TryParse(textBoxNTRIPLat.Text, out ntripClient.lat);
-                                parseResult &= double.TryParse(textBoxNTRIPLon.Text, out ntripClient.lng);
-                                parseResult &= double.TryParse(textBoxNTRIPAlt.Text, out ntripClient.alt);
+                                parseResult &= double.TryParse(textBoxNTRIPLat.Text, NumberStyles.Float, CultureInfo.CurrentCulture, out ntripClient.lat);
+                                parseResult &= double.TryParse(textBoxNTRIPLon.Text, NumberStyles.Float, CultureInfo.CurrentCulture, out ntripClient.lng);
+                                parseResult &= double.TryParse(textBoxNTRIPAlt.Text, NumberStyles.Float, CultureInfo.CurrentCulture, out ntripClient.alt);
                                 if (!parseResult)
                                 {
                                     MessageBox.Show("Can not parse NTRIP Lat/Lon/Alt values. Service may not work properly. Re-enter proper values and reconnect. ", "Position values error", MessageBoxButtons.OK, MessageBoxIcon.Error);
